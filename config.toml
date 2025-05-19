@@ -1,0 +1,13 @@
+[theme]
+primaryColor="#66913E"  # Tu COLOR_VERDE_ECO
+backgroundColor="#FFFFFF" # Fondo blanco explícito
+secondaryBackgroundColor="#F0F2F6" # Un gris muy claro para elementos secundarios (como el fondo de los tabs inactivos)
+textColor="#173D4A" # Tu COLOR_AZUL_ECO para el texto principal
+font="sans serif" # O "serif" o "monospace"
+
+[logger]
+level = "info" # Opcional: para controlar los logs de Streamlit
+
+[server]
+headless = true # Recomendado para despliegues
+runOnSave = true # Opcional: para recargar automáticamente al guardar app.py
