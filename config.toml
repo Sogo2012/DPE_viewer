@@ -1,13 +1,56 @@
+*   **`base="light"`:** Es la clave para
 [theme]
-primaryColor="#66913E"  # Tu COLOR_VERDE_ECO
-backgroundColor="#FFFFFF" # Fondo blanco explícito
-secondaryBackgroundColor="#F0F2F6" # Un gris muy claro para elementos secundarios (como el fondo de los tabs inactivos)
-textColor="#173D4A" # Tu COLOR_AZUL_ECO para el texto principal
-font="sans serif" # O "serif" o "monospace"
+# Colores base de la aplicación
+primaryColor="#66913E" # que la app se vea clara.
+*   **`textColor="#173D4A"`:** Has usado Tu COLOR_VERDE_ECO (usado para acentos, widgets activos)
+backgroundColor="#FFFFFF" # Fondo principal tu `COLOR_AZUL_ECO` para el texto principal. Esto está bien y le dará un toque distintivo. El blanco explícito
+secondaryBackgroundColor="#F0F2F6" # Un gris muy claro para elementos secundarios (fondo `textColor` por defecto del tema claro de Streamlit es un negro (`#000000` o similar).
+ de sidebar, expanders, etc.)
+textColor="#173D4A" # Tu COLOR_AZUL_ECO (*   **Comentarios:** He añadido comentarios para explicar cada línea.
+*   **Coincidencia con CSS:**
+usado para texto principal, títulos H1)
+
+# Familia de fuentes
+# Opciones: "sans serif", "serif    *   Tu `COLOR_TEXTO_TITULO_PRINCIPAL = COLOR_AZUL_ECO` se", "monospace"
+font="sans serif"
+
+# Estos son opcionales y anulan los colores generados automáticamente alinea con `textColor`.
+    *   Tu `COLOR_TEXTO_SUBTITULO_SECCION = COLOR_VERDE_ECO` se alinea con `primaryColor`.
+    *   Tu `COLOR_TEXTO_CU si se usa 'base'.
+# Si quieres un control más fino, podrías definirlos:
+# Estilo deERPO = "#333333"` en el CSS es un poco más oscuro que `textColor` definido en ` los encabezados
+# [heading]
+# color = "#173D4A" # Color para Hconfig.toml` si este es `#173D4A`. Streamlit intentará aplicar `textColor` de `1, H2, H3 si textColor no es suficiente
+
+# Estilo de los elementos del cuerpo
+# [config.toml` de forma general. Si quieres que el cuerpo del texto sea específicamente `#333333`,body]
+# color = "#333333" # Tu COLOR_TEXTO_CUERPO tu CSS en `app.py` intentará sobrescribirlo. En general, es bueno que haya consistencia.
+
+** (si textColor no es suficiente para párrafos)
+
 
 [logger]
-level = "info" # Opcional: para controlar los logs de Streamlit
+# Nivel de los logs de Streamlit. Opciones: "error", "warning", "info", "debug"
+level = "info" # "Para aplicar estos cambios:**
+
+1.  Reemplaza el contenido de tu archivo `config.toml` en tu repositorio de GitHub con el código de arriba.
+2.  Haz `commit` y `push` de los cambios.
+info" es un buen balance. "debug" para más detalle.
+
 
 [server]
-headless = true # Recomendado para despliegues
-runOnSave = true # Opcional: para recargar automáticamente al guardar app.py
+# Se recomienda para despliegues, evita que Streamlit abra un navegador automáticamente.
+headless = true
+# Opcional: para recargar automáticamente la3.  Streamlit Community Cloud debería detectar el cambio y redesplegar tu aplicación.
+4.  Verifica la aplicación desple aplicación en el navegador cuando guardas app.py (útil en desarrollo local).
+# En Streamlit Cloud,gada. Debería tener ahora un tema claro.
+
+**Sobre el logo:**
+Si el logo sigue sin aparecer después de esto, y la información de depuración en la sidebar (que añadimos en el `app.py` anterior) muestra esto no tiene mucho efecto ya que el redespliegue maneja la recarga.
+runOnSave = true que `os.path.exists(LOGO_PATH)` es `False`, entonces el problema sigue siendo que la ruta o el
+
+
+[client]
+# Opcional: para controlar si se muestran advertencias sobre el uso de caché, etc.
+show archivo no se encuentran como se espera en el entorno de Streamlit Cloud. En ese caso, tendríamos que enfocarnos enErrorDetails = true # Muestra detalles completos de los errores, útil para depuración.
+toolbarMode = "developer los mensajes de `LOGO_PATH` y `os.getcwd()` que muestra la sección de debug en la app desple" # Opciones: "developer", "viewer", "minimal". "developer" muestra más opciones.
