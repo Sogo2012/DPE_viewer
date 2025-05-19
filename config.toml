@@ -1,14 +1,14 @@
 [theme]
 base="light"
-primaryColor="#66913E"                # COLOR_VERDE_ECO
-backgroundColor="#FFFFFF"             # Fondo blanco
-secondaryBackgroundColor="#F0F2F6"    # Gris claro para elementos secundarios
-textColor="#173D4A"                   # COLOR_AZUL_ECO para texto principal
+primaryColor="#66913E"
+backgroundColor="#FFFFFF"
+secondaryBackgroundColor="#F0F2F6"
+textColor="#173D4A" # O #333333 si prefieres que todo el texto sea más oscuro
 font="sans serif"
 
 [logger]
-level = "info"                        # Opciones: "error", "warning", "info", "debug"
+level = "info"
 
 [server]
-headless = true                       # Recomendado para despliegues
-runOnSave = true                      # Útil para desarrollo local, recarga automática
+headless = true
+runOnSave = true
