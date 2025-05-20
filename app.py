@@ -8,7 +8,46 @@ from PIL import Image
 import datetime
 import base64
 import os
+# URL del GeoJSON de GADM para Costa Rica (Provincias)
+URL_GEOJSON_GADM_PROVINCIAS_CR_ZIP = "https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_CRI_1.json.zip"
+GEOJSON_FILENAME = "gadm41_CRI_1.json" # Nombre del archivo dentro del ZIP
 
+@st.cache_data(ttl=60*60*24) # Cachear por 24 horas
+def load_geojson_costa_rica():
+    """
+    Descarga, descomprime y carga el archivo GeoJSON de las provincias de Costa Rica.
+    Retorna el contenido del GeoJSON como un diccionario Python.
+    """
+    try:
+        print(f"Intentando descargar GeoJSON desde: {URL_GEOJSON_GADM_PROVINCIAS_CR_ZIP}")
+        response = requests.get(URL_GEOJSON_GADM_PROVINCIAS_CR_ZIP, stream=True, timeout=30)
+        response.raise_for_status()
+        
+        # Usar BytesIO para manejar el contenido del ZIP en memoria
+        zip_in_memory = io.BytesIO(response.content)
+        
+        with zipfile.ZipFile(zip_in_memory, 'r') as zip_ref:
+            if GEOJSON_FILENAME in zip_ref.namelist():
+                with zip_ref.open(GEOJSON_FILENAME) as geojson_file:
+                    geojson_data = json.load(geojson_file)
+                print("GeoJSON de Costa Rica cargado y cacheado exitosamente.")
+                return geojson_data
+            else:
+                st.error(f"Archivo '{GEOJSON_FILENAME}' no encontrado dentro del ZIP descargado.")
+                print(f"Error: Archivo '{GEOJSON_FILENAME}' no en ZIP. Contenido del ZIP: {zip_ref.namelist()}")
+                return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error al descargar el archivo GeoJSON: {e}")
+        print(f"Error descargando GeoJSON: {e}")
+        return None
+    except zipfile.BadZipFile:
+        st.error("El archivo descargado no es un ZIP válido.")
+        print("Error: El archivo descargado no es un ZIP válido.")
+        return None
+    except Exception as e:
+        st.error(f"Un error inesperado ocurrió al procesar el GeoJSON: {e}")
+        print(f"Error inesperado procesando GeoJSON: {e}")
+        return None
 # --- 1. CONFIGURACIÓN DE LA PÁGINA ---
 APP_TITLE = "Visualizador Avanzado de Informes DPE - ECO Consultores"
 LOGO_FILENAME = "Logo_ECO.png" # Corregido a mayúsculas según tu último comentario
