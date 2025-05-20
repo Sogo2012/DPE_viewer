@@ -725,7 +725,7 @@ else: # Si hay datos JSON cargados
 
     st.markdown(f"<h1>{METADATOS_INFORME.get('titulo_informe_base','Informe DPE')} para <b>{st.session_state.nombre_cliente}</b></h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: left; color: {COLOR_TEXTO_SUTIL_CSS}; font-size: 0.9em;'>Versión DPE: {METADATOS_INFORME.get('version_dpe', 'N/A')} | Fecha Diagnóstico: {METADATOS_INFORME.get('fecha_diagnostico', 'N/A')}</p>", unsafe_allow_html=True)
-    st.markdown("<hr>")
+    #st.markdown("<hr>")
 
     if st.session_state.show_json_data:
         with st.expander("Ver Datos JSON Crudos Cargados (Global)", expanded=False):
