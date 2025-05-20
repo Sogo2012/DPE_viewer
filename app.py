@@ -391,28 +391,43 @@ def render_analisis_externo(data): # VERSIÓN MEJORADA DE app.py
                     if col != 'Mes': 
                         df_hist[col] = pd.to_numeric(df_hist[col], errors='coerce')
                         fig_tend.add_trace(go.Scatter(x=df_hist['Mes'], y=df_hist[col], mode='lines+markers', name=f'Hist. {col}', line=dict(width=1.5), marker=dict(size=4)))
-            last_real_month_name = None
+ last_real_month_name = None
             last_real_value = None
+            # Procesar 'actual_real'
             if not df_real.empty and 'Mes' in df_real.columns and 'Valor_Actual' in df_real.columns:
                 df_real['Valor_Actual'] = pd.to_numeric(df_real['Valor_Actual'], errors='coerce')
-                df_real_plot = df_real.dropna(subset=['Valor_Actual']) 
+                df_real_plot = df_real.dropna(subset=['Valor_Actual'])
                 if not df_real_plot.empty:
                     fig_tend.add_trace(go.Scatter(x=df_real_plot['Mes'], y=df_real_plot['Valor_Actual'], mode='lines+markers', name='Actual Real', line=dict(color='black', width=2.5), marker=dict(size=6)))
                     last_real_month_name = df_real_plot['Mes'].iloc[-1]
                     last_real_value = df_real_plot['Valor_Actual'].iloc[-1]
+
+            # Procesar 'actual_proyeccion'
+            # df_proy ahora SÓLO contiene los meses de proyección (ej. Abr-Dic) gracias al JSON corregido
             if not df_proy.empty and 'Mes' in df_proy.columns and 'Valor_Proyeccion' in df_proy.columns:
                 df_proy['Valor_Proyeccion'] = pd.to_numeric(df_proy['Valor_Proyeccion'], errors='coerce')
-                df_proy_plot_final = df_proy.copy().dropna(subset=['Valor_Proyeccion'])
-                if last_real_month_name and last_real_value is not None: 
-                    if last_real_month_name in df_proy_plot_final['Mes'].values:
-                        idx_proy_start = df_proy_plot_final[df_proy_plot_final['Mes'] == last_real_month_name].index
-                        if not idx_proy_start.empty:
-                            idx_proy_start = idx_proy_start[0]
-                            df_temp_proy = df_proy_plot_final.loc[idx_proy_start:].copy()
-                            df_temp_proy.loc[df_temp_proy['Mes'] == last_real_month_name, 'Valor_Proyeccion'] = last_real_value
-                            df_proy_plot_final = df_temp_proy
-                if not df_proy_plot_final.empty:
-                     fig_tend.add_trace(go.Scatter(x=df_proy_plot_final['Mes'], y=df_proy_plot_final['Valor_Proyeccion'], mode='lines+markers', name='Proyección', line=dict(dash='dashdot', color='red', width=2.5), marker=dict(symbol='x', size=6)))
+                # Tomar una copia de los datos de proyección válidos
+                df_proy_for_plot = df_proy.dropna(subset=['Valor_Proyeccion']).copy()
+
+                # Si hay un último punto real, lo añadimos al inicio de la serie de proyección
+                # para que Plotly conecte visualmente las líneas.
+                if last_real_month_name and last_real_value is not None:
+                    # Crear un DataFrame con el último punto real
+                    df_to_prepend = pd.DataFrame([{'Mes': last_real_month_name, 'Valor_Proyeccion': last_real_value}])
+                    
+                    # Si la proyección (ya filtrada) comienza casualmente en el mismo mes que el último real
+                    # (no debería ocurrir con el JSON corregido, pero es una guarda), la eliminamos para evitar duplicados.
+                    if not df_proy_for_plot.empty and df_proy_for_plot['Mes'].iloc[0] == last_real_month_name:
+                         df_proy_for_plot = df_proy_for_plot[df_proy_for_plot['Mes'] != last_real_month_name]
+
+                    # Unir el punto real al inicio de los datos de proyección
+                    df_proy_for_plot = pd.concat([df_to_prepend, df_proy_for_plot], ignore_index=True)
+                    # Asegurar que no haya meses duplicados (tomando la primera ocurrencia, que sería el punto real)
+                    df_proy_for_plot.drop_duplicates(subset=['Mes'], keep='first', inplace=True)
+
+                # Graficar la serie de proyección (que ahora incluye el punto de conexión)
+                if not df_proy_for_plot.empty:
+                     fig_tend.add_trace(go.Scatter(x=df_proy_for_plot['Mes'], y=df_proy_for_plot['Valor_Proyeccion'], mode='lines+markers', name='Proyección', line=dict(dash='dashdot', color='red', width=2.5), marker=dict(symbol='x', size=6)))
             fig_tend.update_layout(
                 title_text=sec_cfia.get("grafico_tendencia_m2_titulo_sugerido", "Tendencia M² Construidos (CFIA)"), title_x=0.5,
                 xaxis_title='Mes', yaxis_title='M² Construidos',
