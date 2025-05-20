@@ -58,7 +58,16 @@ st.set_page_config(
 )
 
 # --- 2. ESTILOS Y COLORES ---
-# ... (tus definiciones de color se mantienen) ...
+# Estas variables DEBEN estar definidas ANTES de este bloque st.markdown
+COLOR_AZUL_ECO = "#173D4A"
+COLOR_VERDE_ECO = "#66913E"
+COLOR_GRIS_ECO = "#414549"
+COLOR_TEXTO_TITULO_PRINCIPAL_CSS = COLOR_AZUL_ECO
+COLOR_TEXTO_SUBTITULO_SECCION_CSS = COLOR_VERDE_ECO
+COLOR_TEXTO_SUB_SUBTITULO_CSS = COLOR_GRIS_ECO
+COLOR_TEXTO_CUERPO_CSS = "#333333"
+COLOR_TEXTO_SUTIL_CSS = "#7f8c8d"
+COLOR_TEXTO_BLANCO_CSS = "#FFFFFF"
 
 st.markdown(f"""
 <style>
@@ -66,38 +75,38 @@ st.markdown(f"""
 
     /* Contenedor de la lista de pestañas */
     div[data-baseweb="tab-list"] {{
-        gap: 12px !important; /* Reduce el espacio entre pestañas si es mucho */
-        border-bottom: 3px solid transparent !important; /* Base para la línea inferior */
-        padding-bottom: 0px !important; /* Evitar que el borde del contenedor se vea */
+        gap: 12px !important;
+        border-bottom: 3px solid transparent !important;
+        padding-bottom: 0px !important;
     }}
 
     /* Pestaña individual (NO ACTIVA) */
     div[data-baseweb="tab-list"] button[data-baseweb="tab"] {{
-        height: auto !important; /* Altura automática para acomodar texto */
-        min-height: 45px; /* Altura mínima */
-        white-space: normal !important; /* Permite que el texto se divida en múltiples líneas */
-        word-break: break-word; /* Ayuda a romper palabras largas si es necesario */
+        height: auto !important;
+        min-height: 45px;
+        white-space: normal !important;
+        word-break: break-word;
         
-        background-color: {COLOR_GRIS_ECO} !important; /* Fondo: Gris ECO */
-        color: {COLOR_TEXTO_BLANCO_CSS} !important; /* Texto: Blanco */
+        background-color: {COLOR_GRIS_ECO} !important;
+        color: {COLOR_TEXTO_BLANCO_CSS} !important;
         
-        border-radius: 8px 8px 0px 0px !important; /* Bordes redondeados superiores */
-        padding: 10px 15px !important; /* Ajusta el padding (vertical, horizontal) */
+        border-radius: 8px 8px 0px 0px !important;
+        padding: 10px 15px !important;
         font-weight: 500 !important;
-        font-size: 0.88rem !important; /* Un poco más pequeño si es necesario */
+        font-size: 0.88rem !important;
         
-        border-bottom: 3px solid transparent !important; /* Línea inferior invisible */
-        margin-bottom: -3px !important; /* Compensa la línea inferior base del tab-list */
+        border-bottom: 3px solid transparent !important;
+        margin-bottom: -3px !important;
         
         transition: background-color 0.2s ease, border-color 0.2s ease !important;
     }}
 
     /* Pestaña individual (ACTIVA) */
     div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"] {{
-        background-color: {COLOR_AZUL_ECO} !important; /* Fondo: Azul ECO */
-        color: {COLOR_TEXTO_BLANCO_CSS} !important; /* Texto: Blanco */
+        background-color: {COLOR_AZUL_ECO} !important;
+        color: {COLOR_TEXTO_BLANCO_CSS} !important;
         font-weight: bold !important;
-        border-bottom-color: {COLOR_VERDE_ECO} !important; /* Línea inferior: Verde ECO */
+        border-bottom-color: {COLOR_VERDE_ECO} !important;
     }}
 
     /* Ajuste para el contenedor interno del tab-list (si existe y causa problemas) */
@@ -112,7 +121,7 @@ st.markdown(f"""
     h2 {{ color: {COLOR_TEXTO_SUBTITULO_SECCION_CSS}; border-bottom: 2px solid {COLOR_VERDE_ECO}; padding-bottom: 0.3rem; margin-top: 2rem; }}
     h3 {{ color: {COLOR_TEXTO_SUB_SUBTITULO_CSS}; margin-top: 1.5rem; }}
     p, div, span, li, .stMarkdown {{ color: {COLOR_TEXTO_CUERPO_CSS}; line-height: 1.6; }}
-    .stCaption {{ color: {COLOR_TEXTO_SUTIL_CSS}; }} /* Para st.caption */
+    .stCaption {{ color: {COLOR_TEXTO_SUTIL_CSS}; }}
     hr {{ margin-top: 0.5rem; margin-bottom: 1rem; border: 0; border-top: 1px solid #D5D8DC; }}
 </style>
 """, unsafe_allow_html=True)
