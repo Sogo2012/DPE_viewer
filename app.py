@@ -730,21 +730,22 @@ else: # Si hay datos JSON cargados
     if st.session_state.show_json_data:
         with st.expander("Ver Datos JSON Crudos Cargados (Global)", expanded=False):
             st.json(json_data_main)
-
     # Definición de pestañas y su contenido
     tab_titles_map = {
         "Portada": "portada",
-        "Glosario": "glosario",
-        "I. Resumen Ejecutivo": "resumen_ejecutivo",
-        "II. Introducción": "introduccion_contexto",
-        "III. Análisis Externo": "analisis_entorno_externo",
-        "IV. Diagnóstico Interno": "diagnostico_interno",
-        "V. Síntesis FODA": "sintesis_estrategica_foda",
-        "VI. Formulación Estratégica": "formulacion_estrategica",
-        "VII. Hoja de Ruta": "hoja_ruta_estrategica",
-        "VIII. Implementación": "consideraciones_implementacion",
-        "IX. Conclusiones": "conclusiones_finales"
+        "Resumen Ejecutivo": "resumen_ejecutivo",
+        "Introducción": "introduccion_contexto",
+        "Análisis Externo": "analisis_entorno_externo",
+        "Diagnóstico Interno": "diagnostico_interno",
+        "Síntesis FODA": "sintesis_estrategica_foda",
+        "Formulación Estratégica": "formulacion_estrategica",
+        "Hoja de Ruta": "hoja_ruta_estrategica",
+        "Implementación": "consideraciones_implementacion",
+        "Conclusiones": "conclusiones_finales",
+        "Glosario": "glosario"  # Movido al final para mantener un orden lógico, o puedes dejarlo donde estaba.
+                                # El PDF original muestra "X. Glosario" así que quitar "X." es consistente.
     }
+
     
     # Crear las pestañas
     tabs_list = st.tabs(list(tab_titles_map.keys()))
