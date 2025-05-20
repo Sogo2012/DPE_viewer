@@ -113,14 +113,6 @@ if 'show_json_data' not in st.session_state:
 
 # --- 4. BARRA LATERAL ---
 with st.sidebar:
-    # Comentamos la info de debug del logo, ya que dijiste que se resolvió
-    # st.subheader("Debug Info (Logo)")
-    # st.text(f"LOGO_PATH: ...{logo_path_calculated[-40:]}")
-    # st.text(f"os.getcwd(): ...{current_working_directory[-30:]}")
-    # st.text(f"Logo existe: {logo_exists_at_path}")
-    # st.text(f"logo_base64 cargado: {bool(logo_base64)}")
-    # st.markdown("---")
-
     if logo_base64:
         st.markdown(
             f'<div style="display: flex; justify-content: center; padding-bottom:10px;"><img src="data:image/png;base64,{logo_base64}" alt="Logo ECO Consultores" style="max-width: 80%; height: auto;"></div>',
@@ -128,7 +120,6 @@ with st.sidebar:
         )
     else:
         st.markdown(f"<h2 style='color:{COLOR_AZUL_ECO}; text-align:center;'>ECO Consultores</h2>", unsafe_allow_html=True)
-        # print(f"ADVERTENCIA (Sidebar): Logo no encontrado en '{logo_path_calculated}'. Mostrando texto.")
 
     st.markdown("---")
     st.header("Cargar Informe DPE")
@@ -156,21 +147,18 @@ with st.sidebar:
             except json.JSONDecodeError as jde:
                 st.session_state.error_carga = f"Error de Decodificación: El archivo no es un JSON válido. Detalle: {jde}"
                 st.session_state.json_data = None
-                st.error(st.session_state.error_carga) # Mostrar error en la UI
+                st.error(st.session_state.error_carga) 
             except Exception as e:
                 st.session_state.error_carga = f"Error Crítico al procesar: {str(e)}."
                 st.session_state.json_data = None
-                st.error(st.session_state.error_carga) # Mostrar error en la UI
+                st.error(st.session_state.error_carga) 
 
     if st.session_state.json_data:
         st.markdown("---")
         if st.button("🧹 Limpiar Datos y Reiniciar"):
             keys_to_delete = list(st.session_state.keys())
             for key in keys_to_delete:
-                # Mantener flags de depuración si las hubiere, o quitarlas si ya no se necesitan
-                # if key not in ['logo_debug_printed', 'logo_warning_sidebar_printed']:
                 del st.session_state[key]
-            # Re-inicializar estados básicos
             st.session_state.json_data = None
             st.session_state.nombre_cliente = "Cliente"
             st.session_state.error_carga = None
@@ -179,7 +167,6 @@ with st.sidebar:
         st.session_state.show_json_data = st.toggle("Mostrar datos JSON crudos", value=st.session_state.get('show_json_data', False))
 
 # --- DEFINICIONES DE FUNCIONES DE RENDERIZADO ---
-# (Incluyendo la versión mejorada de render_analisis_externo para el gráfico BCCR)
 
 def render_portada(data):
     st.markdown(f"<div style='padding: 20px; text-align:center;'>", unsafe_allow_html=True)
@@ -192,7 +179,7 @@ def render_portada(data):
     
     st.markdown(f"<p style='font-size: 1.1em; color: {COLOR_GRIS_ECO}; margin-bottom: 100px;'>{data.get('fecha_diagnostico_texto', metadatos_informe_local.get('fecha_diagnostico', 'N/A'))}</p>", unsafe_allow_html=True)
 
-    if logo_exists_at_path: # Usar la variable global pre-calculada
+    if logo_exists_at_path:
         try:
             st.image(LOGO_PATH, width=250)
         except Exception as e:
@@ -206,11 +193,6 @@ def render_portada(data):
     footer_line2_content = data.get('footer_linea2_texto', default_footer_line2_text)
     st.markdown(f"<p style='font-size: 0.9em; color: {COLOR_GRIS_ECO};'>{footer_line2_content}</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
-
-# COPIAR Y PEGAR TODAS LAS FUNCIONES render_... DESDE render_glosario HASTA render_conclusiones
-# DE LA RESPUESTA ANTERIOR (la que te di con app.py y sidebar navigation), ASEGURÁNDOTE DE QUE
-# render_analisis_externo sea la versión con el gráfico BCCR de doble eje.
-# Las he incluido abajo para completitud.
 
 def render_glosario(data):
     st.header(data.get('titulo_seccion_texto', 'X. Glosario de Términos')) 
@@ -259,13 +241,13 @@ def render_resumen_ejecutivo(data_re):
                                     gridcolor=COLOR_GRIS_ECO, linecolor=COLOR_GRIS_ECO,
                                     tickfont=dict(size=9, color=COLOR_GRIS_ECO)),
                     angularaxis=dict(showline=False, ticks='outside', direction="clockwise",
-                                     tickfont=dict(size=10, color=COLOR_TEXTO_CUERPO_CSS)) # Usar color de config.toml si es posible
+                                     tickfont=dict(size=10, color=COLOR_TEXTO_CUERPO_CSS))
                 ),
                 title=dict(text=sec_madurez_global.get("grafico_radar_titulo_sugerido", "Nivel de Madurez por Área (%)"),
                            x=0.5, font=dict(size=16, color=COLOR_TEXTO_TITULO_PRINCIPAL_CSS)),
                 showlegend=False, height=450, margin=dict(l=50, r=50, t=80, b=50),
                 paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color=COLOR_TEXTO_CUERPO_CSS, size=11) # Usar color de config.toml si es posible
+                font=dict(color=COLOR_TEXTO_CUERPO_CSS, size=11)
             )
             st.plotly_chart(fig_radar, use_container_width=True)
             st.caption(sec_madurez_global.get("grafico_radar_caption_texto", 
@@ -320,7 +302,7 @@ def render_introduccion_contexto(data):
     for item in seccion_alcance.get('lista_metodologia_textos', []): st.markdown(f"• {item}")
     st.caption(seccion_alcance.get('parrafo_limitaciones_texto', ""))
 
-def render_analisis_externo(data): # VERSIÓN MEJORADA DE app.py
+def render_analisis_externo(data):
     st.header(data.get('titulo_seccion_texto', "III. Análisis del Entorno Externo"))
     sec_macro = data.get("macroentorno", {})
     st.subheader(sec_macro.get('subtitulo_texto', "A. Análisis del Macroentorno"))
@@ -362,7 +344,7 @@ def render_analisis_externo(data): # VERSIÓN MEJORADA DE app.py
                                     visible=tc_data_exists), 
                         legend_title_text='Indicadores', legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
                         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                        font_color=COLOR_TEXTO_CUERPO_CSS # Usar color de config.toml si es posible
+                        font_color=COLOR_TEXTO_CUERPO_CSS
                     )
                     st.plotly_chart(fig_bccr, use_container_width=True)
                     st.caption(sec_macro.get("grafico_bccr_caption_texto", sec_macro.get("grafico_bccr_titulo_sugerido","")))
@@ -380,20 +362,24 @@ def render_analisis_externo(data): # VERSIÓN MEJORADA DE app.py
     st.subheader(sec_cfia.get('subtitulo_texto', "B. Análisis del Sector/Industria (Construcción Costa Rica)"))
     st.write(sec_cfia.get('parrafo_intro_texto', ""))
     tend_data = sec_cfia.get("grafico_tendencia_m2_data", {})
-    if tend_data and tend_data.get("historico") and tend_data.get("actual_proyeccion"):
+    if tend_data and tend_data.get("historico") and tend_data.get("actual_proyeccion"): # Asegurar que ambas claves importantes existan
         try:
             df_hist = pd.DataFrame(tend_data["historico"])
-            df_proy = pd.DataFrame(tend_data["actual_proyeccion"])
-            df_real = pd.DataFrame(tend_data.get("actual_real", [])) 
+            df_proy = pd.DataFrame(tend_data["actual_proyeccion"]) # Esta ahora solo tiene meses proyectados
+            df_real = pd.DataFrame(tend_data.get("actual_real", [])) # Esta tiene los meses reales del año actual
+            
             fig_tend = go.Figure()
+
+            # Graficar datos históricos
             if not df_hist.empty and 'Mes' in df_hist.columns:
                 for col in df_hist.columns:
                     if col != 'Mes': 
                         df_hist[col] = pd.to_numeric(df_hist[col], errors='coerce')
                         fig_tend.add_trace(go.Scatter(x=df_hist['Mes'], y=df_hist[col], mode='lines+markers', name=f'Hist. {col}', line=dict(width=1.5), marker=dict(size=4)))
- last_real_month_name = None
+            
+            # Procesar y graficar 'actual_real'
+            last_real_month_name = None
             last_real_value = None
-            # Procesar 'actual_real'
             if not df_real.empty and 'Mes' in df_real.columns and 'Valor_Actual' in df_real.columns:
                 df_real['Valor_Actual'] = pd.to_numeric(df_real['Valor_Actual'], errors='coerce')
                 df_real_plot = df_real.dropna(subset=['Valor_Actual'])
@@ -402,37 +388,26 @@ def render_analisis_externo(data): # VERSIÓN MEJORADA DE app.py
                     last_real_month_name = df_real_plot['Mes'].iloc[-1]
                     last_real_value = df_real_plot['Valor_Actual'].iloc[-1]
 
-            # Procesar 'actual_proyeccion'
-            # df_proy ahora SÓLO contiene los meses de proyección (ej. Abr-Dic) gracias al JSON corregido
+            # Procesar y graficar 'actual_proyeccion'
             if not df_proy.empty and 'Mes' in df_proy.columns and 'Valor_Proyeccion' in df_proy.columns:
                 df_proy['Valor_Proyeccion'] = pd.to_numeric(df_proy['Valor_Proyeccion'], errors='coerce')
-                # Tomar una copia de los datos de proyección válidos
                 df_proy_for_plot = df_proy.dropna(subset=['Valor_Proyeccion']).copy()
 
-                # Si hay un último punto real, lo añadimos al inicio de la serie de proyección
-                # para que Plotly conecte visualmente las líneas.
                 if last_real_month_name and last_real_value is not None:
-                    # Crear un DataFrame con el último punto real
                     df_to_prepend = pd.DataFrame([{'Mes': last_real_month_name, 'Valor_Proyeccion': last_real_value}])
-                    
-                    # Si la proyección (ya filtrada) comienza casualmente en el mismo mes que el último real
-                    # (no debería ocurrir con el JSON corregido, pero es una guarda), la eliminamos para evitar duplicados.
                     if not df_proy_for_plot.empty and df_proy_for_plot['Mes'].iloc[0] == last_real_month_name:
                          df_proy_for_plot = df_proy_for_plot[df_proy_for_plot['Mes'] != last_real_month_name]
-
-                    # Unir el punto real al inicio de los datos de proyección
                     df_proy_for_plot = pd.concat([df_to_prepend, df_proy_for_plot], ignore_index=True)
-                    # Asegurar que no haya meses duplicados (tomando la primera ocurrencia, que sería el punto real)
                     df_proy_for_plot.drop_duplicates(subset=['Mes'], keep='first', inplace=True)
 
-                # Graficar la serie de proyección (que ahora incluye el punto de conexión)
                 if not df_proy_for_plot.empty:
                      fig_tend.add_trace(go.Scatter(x=df_proy_for_plot['Mes'], y=df_proy_for_plot['Valor_Proyeccion'], mode='lines+markers', name='Proyección', line=dict(dash='dashdot', color='red', width=2.5), marker=dict(symbol='x', size=6)))
+            
             fig_tend.update_layout(
                 title_text=sec_cfia.get("grafico_tendencia_m2_titulo_sugerido", "Tendencia M² Construidos (CFIA)"), title_x=0.5,
                 xaxis_title='Mes', yaxis_title='M² Construidos',
                 paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                font_color=COLOR_TEXTO_CUERPO_CSS, # Usar color de config.toml si es posible
+                font_color=COLOR_TEXTO_CUERPO_CSS,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
             st.plotly_chart(fig_tend, use_container_width=True)
@@ -440,7 +415,8 @@ def render_analisis_externo(data): # VERSIÓN MEJORADA DE app.py
         except Exception as e:
             st.error(f"Error al generar gráfico de tendencia CFIA: {e}")
     else:
-        st.info("Datos para gráfico de tendencia M2 (CFIA) no disponibles o incompletos.")
+        st.info("Datos para gráfico de tendencia M2 (CFIA) no disponibles o incompletos. Faltan claves 'historico' o 'actual_proyeccion'.")
+    
     sec_comp = data.get("analisis_competencia", {})
     st.subheader(sec_comp.get('subtitulo_texto', "C. Análisis de la Competencia"))
     st.write(sec_comp.get('parrafo_intro_texto', ""))
@@ -496,7 +472,7 @@ def render_diagnostico_interno(data):
                                           title_text=area_data.get('grafico_barra_madurez_caption_texto', f"Madurez: {graf_data['label']}"), 
                                           title_x=0.5,
                                           paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                          font_color=COLOR_TEXTO_CUERPO_CSS) # Usar color de config.toml si es posible
+                                          font_color=COLOR_TEXTO_CUERPO_CSS)
                     st.plotly_chart(fig_bar, use_container_width=True)
                 except ValueError:
                     st.warning(f"Valor no numérico para gráfico de barra en '{area_titulo_display}': {graf_data['value']}")
@@ -740,12 +716,12 @@ else: # Si hay datos JSON cargados
 
     st.markdown(f"<h1>{METADATOS_INFORME.get('titulo_informe_base','Informe DPE')} para <b>{st.session_state.nombre_cliente}</b></h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: left; color: {COLOR_TEXTO_SUTIL_CSS}; font-size: 0.9em;'>Versión DPE: {METADATOS_INFORME.get('version_dpe', 'N/A')} | Fecha Diagnóstico: {METADATOS_INFORME.get('fecha_diagnostico', 'N/A')}</p>", unsafe_allow_html=True)
-    #st.markdown("<hr>")
+    #st.markdown("<hr>") # HR extra eliminada correctamente
 
     if st.session_state.show_json_data:
         with st.expander("Ver Datos JSON Crudos Cargados (Global)", expanded=False):
             st.json(json_data_main)
-    # Definición de pestañas y su contenido
+    
     tab_titles_map = {
         "Portada": "portada",
         "Resumen Ejecutivo": "resumen_ejecutivo",
@@ -757,15 +733,11 @@ else: # Si hay datos JSON cargados
         "Hoja de Ruta": "hoja_ruta_estrategica",
         "Implementación": "consideraciones_implementacion",
         "Conclusiones": "conclusiones_finales",
-        "Glosario": "glosario"  # Movido al final para mantener un orden lógico, o puedes dejarlo donde estaba.
-                                # El PDF original muestra "X. Glosario" así que quitar "X." es consistente.
+        "Glosario": "glosario"
     }
-
     
-    # Crear las pestañas
     tabs_list = st.tabs(list(tab_titles_map.keys()))
 
-    # Mapeo de funciones de renderizado
     render_functions_map = {
         "portada": render_portada,
         "glosario": render_glosario,
@@ -780,7 +752,6 @@ else: # Si hay datos JSON cargados
         "conclusiones_finales": render_conclusiones
     }
 
-    # Iterar sobre las pestañas y renderizar su contenido
     for i, tab_title_display in enumerate(tab_titles_map.keys()):
         with tabs_list[i]:
             data_key = tab_titles_map[tab_title_display]
@@ -788,11 +759,10 @@ else: # Si hay datos JSON cargados
             data_for_section = json_data_main.get(data_key, {})
 
             if render_function:
-                if data_for_section or data_key == "portada": # La portada puede ser escasa pero debe renderizarse
+                if data_for_section or data_key == "portada":
                     render_function(data_for_section)
                 else:
                     st.warning(f"Datos para la sección '{tab_title_display}' (clave: '{data_key}') no encontrados o vacíos en el archivo JSON.")
-                    # Intentar renderizar con un diccionario vacío para que la función muestre sus propios mensajes
                     render_function({})
             else:
                 st.error(f"Función de renderizado no encontrada para la clave de datos: {data_key}")
