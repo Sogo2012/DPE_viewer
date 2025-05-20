@@ -69,16 +69,18 @@ COLOR_TEXTO_CUERPO_CSS = "#333333" # Para párrafos en CSS
 COLOR_TEXTO_SUTIL_CSS = "#7f8c8d" # Para captions en CSS
 COLOR_TEXTO_BLANCO_CSS = "#FFFFFF" # Para texto sobre fondos oscuros en CSS
 
+# --- 2. ESTILOS Y COLORES ---
 st.markdown(f"""
 <style>
     /* CSS para ajustes finos. El tema base y colores principales se manejan con config.toml */
     /* Estilos para st.tabs */
-    .stTabs [data-baseweb="tab-list"] {
+    .stTabs [data-baseweb="tab-list"] {{
         gap: 18px; /* Espacio entre pestañas */
         /* Para el borde inferior (la línea que se mueve) */
         border-bottom: 3px solid transparent !important; /* Base transparente */
-    }
-    .stTabs [data-baseweb="tab"] { /* PESTAÑA NO ACTIVA */
+    }}
+    /* PESTAÑA NO ACTIVA */
+    .stTabs [data-baseweb="tab"] {{ 
         height: 45px; /* Puedes ajustar si necesitas más/menos altura */
         white-space: pre-wrap; /* Permite que el texto se divida en múltiples líneas si es largo */
         background-color: {COLOR_GRIS_ECO}; /* Fondo: Gris ECO */
@@ -89,18 +91,19 @@ st.markdown(f"""
         border-bottom: 3px solid transparent !important; /* Línea inferior transparente por defecto */
         margin-bottom: -3px; /* Compensa el borde inferior para que la línea "roja" original no se vea */
         transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Transición suave */
-    }
-    .stTabs [aria-selected="true"] { /* PESTAÑA ACTIVA */
+    }}
+    /* PESTAÑA ACTIVA */
+    .stTabs [aria-selected="true"] {{ 
         background-color: {COLOR_AZUL_ECO}; /* Fondo: Azul ECO */
         color: {COLOR_TEXTO_BLANCO_CSS}; /* Texto: Blanco */
         font-weight: bold;
         border-bottom-color: {COLOR_VERDE_ECO} !important; /* Línea inferior: Verde ECO */
-    }
+    }}
 
     /* Ajuste adicional para asegurar que la línea del tab-list no interfiera */
-    .stTabs [data-baseweb="tab-list"] > div {
+    .stTabs [data-baseweb="tab-list"] > div {{
         border-bottom: none !important; /* Ocultar cualquier borde inferior que pueda tener el contenedor interno */
-    }
+    }}
 
     /* Estilos generales si config.toml no los toma bien */
     h1 {{ color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS}; padding-bottom: 0.5rem; border-bottom: 3px solid {COLOR_AZUL_ECO}; }}
