@@ -668,7 +668,32 @@ def render_conclusiones(data):
     st.write(sec_con_gral.get('parrafo1_texto', 
              "El Diagnóstico de Planificación Estratégica ha proporcionado una evaluación integral de la madurez actual y ha sentado las bases para un crecimiento y fortalecimiento futuros."))
     st.write(sec_con_gral.get('parrafo2_texto', 
-             "Es fundamental entender que la estrategia es un proceso continuo de aprendizaje, adaptación y ejecución."))
+             "Es fundamental entender que la estrategia no es un documento estático, sino un proceso continuo de aprendizaje, adaptación y ejecución."))
+    st.markdown("---")
+    sec_rec90 = data.get("recomendaciones_proximos_90_dias_data", {})
+    st.subheader(sec_rec90.get('subtitulo_texto', "A. Recomendaciones Específicas para los Próximos 90 Días"))
+    
+    parrafo_intro_recs = sec_rec90.get('parrafo_intro_texto', "")
+    lista_recs = sec_rec90.get('lista_recomendaciones_textos', [])
+
+    # Determinar si la lista de recomendaciones es solo el texto placeholder
+    is_list_a_placeholder = False
+    if lista_recs and len(lista_recs) == 1 and "(Placeholder:" in lista_recs[0]:
+        is_list_a_placeholder = True
+
+    if is_list_a_placeholder:
+        # Mostrar el párrafo introductorio NORMALMENTE
+        st.write(parrafo_intro_recs)
+        # Y luego el contenido del placeholder en un st.info
+        st.info(lista_recs[0]) 
+    elif lista_recs: # Si hay recomendaciones reales (no placeholder)
+        st.write(parrafo_intro_recs)
+        for item in lista_recs: 
+            st.markdown(f"• {item}")
+    else: # Si la lista está completamente vacía (no hay ni placeholder)
+        st.write(parrafo_intro_recs) # Mostrar intro de todas formas
+        st.info(texto_sesion_trabajo) # Y luego el texto de sesión de trabajo general
+
     st.markdown("---")
     sec_rec90 = data.get("recomendaciones_proximos_90_dias_data", {})
     st.subheader(sec_rec90.get('subtitulo_texto', "A. Recomendaciones Específicas para los Próximos 90 Días"))
