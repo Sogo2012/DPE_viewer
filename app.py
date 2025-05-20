@@ -58,16 +58,7 @@ st.set_page_config(
 )
 
 # --- 2. ESTILOS Y COLORES ---
-# Estas variables DEBEN estar definidas ANTES de este bloque st.markdown
-COLOR_AZUL_ECO = "#173D4A"
-COLOR_VERDE_ECO = "#66913E"
-COLOR_GRIS_ECO = "#414549"
-COLOR_TEXTO_TITULO_PRINCIPAL_CSS = COLOR_AZUL_ECO
-COLOR_TEXTO_SUBTITULO_SECCION_CSS = COLOR_VERDE_ECO
-COLOR_TEXTO_SUB_SUBTITULO_CSS = COLOR_GRIS_ECO
-COLOR_TEXTO_CUERPO_CSS = "#333333"
-COLOR_TEXTO_SUTIL_CSS = "#7f8c8d"
-COLOR_TEXTO_BLANCO_CSS = "#FFFFFF"
+# ... (tus definiciones de color se mantienen) ...
 
 st.markdown(f"""
 <style>
@@ -75,41 +66,59 @@ st.markdown(f"""
 
     /* Contenedor de la lista de pestañas */
     div[data-baseweb="tab-list"] {{
-        gap: 12px !important;
-        border-bottom: 3px solid transparent !important;
-        padding-bottom: 0px !important;
+        gap: 12px !important; 
+        border-bottom: 3px solid transparent !important; /* Mantenemos la base transparente */
+        padding-bottom: 0px !important; 
     }}
 
-    /* Pestaña individual (NO ACTIVA) */
+    /* Pestaña individual (botón) - Estilos generales para ambas activas y no activas */
     div[data-baseweb="tab-list"] button[data-baseweb="tab"] {{
-        height: auto !important;
-        min-height: 45px;
-        white-space: normal !important;
+        height: auto !important; 
+        min-height: 45px; 
+        white-space: normal !important; 
         word-break: break-word;
-        
-        background-color: {COLOR_GRIS_ECO} !important;
-        color: {COLOR_TEXTO_BLANCO_CSS} !important;
-        
-        border-radius: 8px 8px 0px 0px !important;
-        padding: 10px 15px !important;
+        border-radius: 8px 8px 0px 0px !important; 
+        padding: 10px 15px !important; 
         font-weight: 500 !important;
-        font-size: 0.88rem !important;
-        
-        border-bottom: 3px solid transparent !important;
-        margin-bottom: -3px !important;
-        
-        transition: background-color 0.2s ease, border-color 0.2s ease !important;
+        font-size: 0.88rem !important; 
+        border-top: none !important; /* Quitar otros bordes por si acaso */
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: 3px solid transparent !important; /* Por defecto transparente */
+        margin-bottom: -3px !important; /* Compensa el borde del tab-list */
+        transition: background-color 0.2s ease, color 0.2s ease, border-bottom-color 0.2s ease !important;
+    }}
+
+    /* Texto DENTRO de CUALQUIER pestaña */
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {{
+        color: {COLOR_TEXTO_BLANCO_CSS} !important; /* Forzar texto blanco para el <p> interno */
+        margin-bottom: 0 !important; /* Asegurar que el párrafo no tenga margen inferior extra */
+    }}
+    
+    /* Pestaña individual (NO ACTIVA) - Solo fondo */
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="false"] {{
+        background-color: {COLOR_GRIS_ECO} !important; /* Fondo: Gris ECO */
+        /* El color del texto ya se establece en la regla más específica de arriba */
     }}
 
     /* Pestaña individual (ACTIVA) */
     div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"] {{
-        background-color: {COLOR_AZUL_ECO} !important;
-        color: {COLOR_TEXTO_BLANCO_CSS} !important;
+        background-color: {COLOR_AZUL_ECO} !important; /* Fondo: Azul ECO */
+        /* El color del texto ya se establece en la regla más específica de arriba */
         font-weight: bold !important;
-        border-bottom-color: {COLOR_VERDE_ECO} !important;
+        border-bottom-color: {COLOR_VERDE_ECO} !important; /* Línea inferior: Verde ECO */
     }}
 
-    /* Ajuste para el contenedor interno del tab-list (si existe y causa problemas) */
+    /* Ocultar la línea roja original de Streamlit si todavía aparece de alguna forma (puede que no sea necesario con lo anterior) */
+    /* Intenta primero SIN esta regla, y añádela si la línea roja persiste y no es el border-bottom */
+    /*
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"]::after {{
+        background-color: transparent !important;
+        height: 0px !important; 
+    }}
+    */
+
+    /* Ajuste para el contenedor interno del tab-list (si existe y causa problemas de borde) */
     div[data-baseweb="tab-list"] > div {{
         border-bottom: none !important;
     }}
@@ -121,7 +130,7 @@ st.markdown(f"""
     h2 {{ color: {COLOR_TEXTO_SUBTITULO_SECCION_CSS}; border-bottom: 2px solid {COLOR_VERDE_ECO}; padding-bottom: 0.3rem; margin-top: 2rem; }}
     h3 {{ color: {COLOR_TEXTO_SUB_SUBTITULO_CSS}; margin-top: 1.5rem; }}
     p, div, span, li, .stMarkdown {{ color: {COLOR_TEXTO_CUERPO_CSS}; line-height: 1.6; }}
-    .stCaption {{ color: {COLOR_TEXTO_SUTIL_CSS}; }}
+    .stCaption {{ color: {COLOR_TEXTO_SUTIL_CSS}; }} 
     hr {{ margin-top: 0.5rem; margin-bottom: 1rem; border: 0; border-top: 1px solid #D5D8DC; }}
 </style>
 """, unsafe_allow_html=True)
