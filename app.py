@@ -604,13 +604,10 @@ def render_conclusiones(data):
              "Agradecemos sinceramente a todo el equipo por su tiempo, apertura y colaboración durante el proceso de diagnóstico."))
 
 # --- 5. ÁREA PRINCIPAL ---
+# json_data_cargado = st.session_state.get('json_data', None) # ESTA LÍNEA ESTABA MAL COLOCADA EN TU ÚLTIMO ARCHIVO
 
-    if st.session_state.error_carga:
-        st.error(f"**Error al Cargar el Archivo:** {st.session_state.error_carga}")
-json_data_cargado = st.session_state.get('json_data', None) # Usa .get() para evitar AttributeError
-
-if json_data_cargado is None:
-    if st.session_state.get('error_carga', None): # Usar .get() también aquí por si acaso
+if st.session_state.get('json_data', None) is None: # Verificación robusta
+    if st.session_state.get('error_carga', None):
         st.error(f"**Error al Cargar el Archivo:** {st.session_state.error_carga}")
 
     st.markdown(f"<h1 style='text-align: center; color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS}; margin-top: 2rem;'>Bienvenido al {APP_TITLE}</h1>", unsafe_allow_html=True)
@@ -623,21 +620,9 @@ if json_data_cargado is None:
     st.markdown("<p style='text-align: center; font-size: 1.2em; margin-bottom: 2rem;'>Para comenzar, por favor cargue el archivo JSON del diagnóstico DPE utilizando el panel de la izquierda.</p>", unsafe_allow_html=True)
     st.info("ℹ️ **Instrucciones:** Use el botón 'Browse files' o arrastre un archivo JSON al área designada en la barra lateral.")
 
+# ESTE 'else' DEBE ESTAR AL MISMO NIVEL QUE EL 'if' ANTERIOR
 else: # Si hay datos JSON cargados
-    json_data_main = json_data_cargado # Usar la variable obtenida con .get()
-    
-    st.markdown(f"<h1 style='text-align: center; color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS}; margin-top: 2rem;'>Bienvenido al {APP_TITLE}</h1>", unsafe_allow_html=True)
-
-    if logo_base64:
-        st.markdown(f"<div style='text-align: center; margin: 2rem 0;'><img src='data:image/png;base64,{logo_base64}' alt='Logo ECO' style='max-width: 150px; height: auto;'></div>", unsafe_allow_html=True)
-    else:
-        st.markdown(f"<p style='text-align: center; font-size: 1.0em; color: {COLOR_TEXTO_SUTIL_CSS};'>(Logo ECO Consultores no disponible)</p>", unsafe_allow_html=True)
-
-    st.markdown("<p style='text-align: center; font-size: 1.2em; margin-bottom: 2rem;'>Para comenzar, por favor cargue el archivo JSON del diagnóstico DPE utilizando el panel de la izquierda.</p>", unsafe_allow_html=True)
-    st.info("ℹ️ **Instrucciones:** Use el botón 'Browse files' o arrastre un archivo JSON al área designada en la barra lateral.")
-
-else: # Si hay datos JSON cargados
-    json_data_main = st.session_state.json_data
+    json_data_main = st.session_state.get('json_data') # Ahora podemos asumir que existe si no es None
     METADATOS_INFORME = json_data_main.get("metadatos_informe", {})
 
     st.markdown(f"<h1>{METADATOS_INFORME.get('titulo_informe_base','Informe DPE')} para <b>{st.session_state.nombre_cliente}</b></h1>", unsafe_allow_html=True)
