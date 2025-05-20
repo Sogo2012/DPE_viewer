@@ -58,52 +58,54 @@ st.set_page_config(
 )
 
 # --- 2. ESTILOS Y COLORES ---
-# Estos colores se usan para el CSS inline. config.toml es prioritario para el tema general.
-COLOR_AZUL_ECO = "#173D4A"
-COLOR_VERDE_ECO = "#66913E"
-COLOR_GRIS_ECO = "#414549"
-COLOR_TEXTO_TITULO_PRINCIPAL_CSS = COLOR_AZUL_ECO # Para H1 en CSS
-COLOR_TEXTO_SUBTITULO_SECCION_CSS = COLOR_VERDE_ECO # Para H2 en CSS
-COLOR_TEXTO_SUB_SUBTITULO_CSS = COLOR_GRIS_ECO # Para H3 en CSS
-COLOR_TEXTO_CUERPO_CSS = "#333333" # Para párrafos en CSS
-COLOR_TEXTO_SUTIL_CSS = "#7f8c8d" # Para captions en CSS
-COLOR_TEXTO_BLANCO_CSS = "#FFFFFF" # Para texto sobre fondos oscuros en CSS
+# ... (tus definiciones de color se mantienen) ...
 
-# --- 2. ESTILOS Y COLORES ---
 st.markdown(f"""
 <style>
-    /* CSS para ajustes finos. El tema base y colores principales se manejan con config.toml */
-    /* Estilos para st.tabs */
-    .stTabs [data-baseweb="tab-list"] {{
-        gap: 18px; /* Espacio entre pestañas */
-        /* Para el borde inferior (la línea que se mueve) */
-        border-bottom: 3px solid transparent !important; /* Base transparente */
+    /* === ESTILOS PARA PESTAÑAS (st.tabs) === */
+
+    /* Contenedor de la lista de pestañas */
+    div[data-baseweb="tab-list"] {{
+        gap: 12px !important; /* Reduce el espacio entre pestañas si es mucho */
+        border-bottom: 3px solid transparent !important; /* Base para la línea inferior */
+        padding-bottom: 0px !important; /* Evitar que el borde del contenedor se vea */
     }}
-    /* PESTAÑA NO ACTIVA */
-    .stTabs [data-baseweb="tab"] {{ 
-        height: 45px; /* Puedes ajustar si necesitas más/menos altura */
-        white-space: pre-wrap; /* Permite que el texto se divida en múltiples líneas si es largo */
-        background-color: {COLOR_GRIS_ECO}; /* Fondo: Gris ECO */
-        border-radius: 6px 6px 0px 0px; /* Bordes redondeados superiores un poco más pronunciados */
-        padding: 8px 12px; /* Reduce un poco el padding para ajustar mejor el texto si es necesario */
-        color: {COLOR_TEXTO_BLANCO_CSS}; /* Texto: Blanco */
-        font-weight: 500;
-        border-bottom: 3px solid transparent !important; /* Línea inferior transparente por defecto */
-        margin-bottom: -3px; /* Compensa el borde inferior para que la línea "roja" original no se vea */
-        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Transición suave */
+
+    /* Pestaña individual (NO ACTIVA) */
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"] {{
+        height: auto !important; /* Altura automática para acomodar texto */
+        min-height: 45px; /* Altura mínima */
+        white-space: normal !important; /* Permite que el texto se divida en múltiples líneas */
+        word-break: break-word; /* Ayuda a romper palabras largas si es necesario */
+        
+        background-color: {COLOR_GRIS_ECO} !important; /* Fondo: Gris ECO */
+        color: {COLOR_TEXTO_BLANCO_CSS} !important; /* Texto: Blanco */
+        
+        border-radius: 8px 8px 0px 0px !important; /* Bordes redondeados superiores */
+        padding: 10px 15px !important; /* Ajusta el padding (vertical, horizontal) */
+        font-weight: 500 !important;
+        font-size: 0.88rem !important; /* Un poco más pequeño si es necesario */
+        
+        border-bottom: 3px solid transparent !important; /* Línea inferior invisible */
+        margin-bottom: -3px !important; /* Compensa la línea inferior base del tab-list */
+        
+        transition: background-color 0.2s ease, border-color 0.2s ease !important;
     }}
-    /* PESTAÑA ACTIVA */
-    .stTabs [aria-selected="true"] {{ 
-        background-color: {COLOR_AZUL_ECO}; /* Fondo: Azul ECO */
-        color: {COLOR_TEXTO_BLANCO_CSS}; /* Texto: Blanco */
-        font-weight: bold;
+
+    /* Pestaña individual (ACTIVA) */
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"] {{
+        background-color: {COLOR_AZUL_ECO} !important; /* Fondo: Azul ECO */
+        color: {COLOR_TEXTO_BLANCO_CSS} !important; /* Texto: Blanco */
+        font-weight: bold !important;
         border-bottom-color: {COLOR_VERDE_ECO} !important; /* Línea inferior: Verde ECO */
     }}
 
-    /* Ajuste adicional para asegurar que la línea del tab-list no interfiera */
-    .stTabs [data-baseweb="tab-list"] > div {{
-        border-bottom: none !important; /* Ocultar cualquier borde inferior que pueda tener el contenedor interno */
+    /* Ajuste para el contenedor interno del tab-list (si existe y causa problemas) */
+    div[data-baseweb="tab-list"] > div {{
+        border-bottom: none !important;
     }}
+
+    /* === FIN ESTILOS PARA PESTAÑAS === */
 
     /* Estilos generales si config.toml no los toma bien */
     h1 {{ color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS}; padding-bottom: 0.5rem; border-bottom: 3px solid {COLOR_AZUL_ECO}; }}
