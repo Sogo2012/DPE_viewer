@@ -660,7 +660,7 @@ def render_implementacion(data):
         for riesgo_item in lista_riesgos:
             st.markdown(f"**Riesgo:** {riesgo_item.get('riesgo_texto', 'No especificado')}")
             st.markdown(f"  *Mitigación Sugerida:* {riesgo_item.get('mitigacion_texto', 'No especificada')}")
-
+            
 def render_conclusiones(data):
     st.header(data.get('titulo_seccion_texto', "IX. Conclusiones Finales y Próximos Pasos Recomendados"))
     texto_sesion_trabajo = "Se recomienda una sesión de trabajo para detallar estos próximos pasos y asegurar el compromiso del equipo."
@@ -668,45 +668,34 @@ def render_conclusiones(data):
     st.write(sec_con_gral.get('parrafo1_texto', 
              "El Diagnóstico de Planificación Estratégica ha proporcionado una evaluación integral de la madurez actual y ha sentado las bases para un crecimiento y fortalecimiento futuros."))
     st.write(sec_con_gral.get('parrafo2_texto', 
-             "Es fundamental entender que la estrategia no es un documento estático, sino un proceso continuo de aprendizaje, adaptación y ejecución."))
+             "Es fundamental entender que la estrategia es un proceso continuo de aprendizaje, adaptación y ejecución."))
     st.markdown("---")
+    
+    # --- SECCIÓN DE RECOMENDACIONES (PROCESADA UNA SOLA VEZ) ---
     sec_rec90 = data.get("recomendaciones_proximos_90_dias_data", {})
     st.subheader(sec_rec90.get('subtitulo_texto', "A. Recomendaciones Específicas para los Próximos 90 Días"))
     
     parrafo_intro_recs = sec_rec90.get('parrafo_intro_texto', "")
     lista_recs = sec_rec90.get('lista_recomendaciones_textos', [])
 
-    # Determinar si la lista de recomendaciones es solo el texto placeholder
     is_list_a_placeholder = False
     if lista_recs and len(lista_recs) == 1 and "(Placeholder:" in lista_recs[0]:
         is_list_a_placeholder = True
 
     if is_list_a_placeholder:
-        # Mostrar el párrafo introductorio NORMALMENTE
-        st.write(parrafo_intro_recs)
-        # Y luego el contenido del placeholder en un st.info
-        st.info(lista_recs[0]) 
-    elif lista_recs: # Si hay recomendaciones reales (no placeholder)
+        st.write(parrafo_intro_recs) # Mostrar el párrafo introductorio
+        st.info(lista_recs[0])      # Mostrar el texto del placeholder en st.info
+    elif lista_recs: # Si hay recomendaciones reales
         st.write(parrafo_intro_recs)
         for item in lista_recs: 
             st.markdown(f"• {item}")
-    else: # Si la lista está completamente vacía (no hay ni placeholder)
-        st.write(parrafo_intro_recs) # Mostrar intro de todas formas
-        st.info(texto_sesion_trabajo) # Y luego el texto de sesión de trabajo general
+    else: # Si la lista está completamente vacía
+        st.write(parrafo_intro_recs) 
+        st.info(texto_sesion_trabajo) 
+    # --- FIN SECCIÓN DE RECOMENDACIONES ---
 
-    st.markdown("---")
-    sec_rec90 = data.get("recomendaciones_proximos_90_dias_data", {})
-    st.subheader(sec_rec90.get('subtitulo_texto', "A. Recomendaciones Específicas para los Próximos 90 Días"))
-    lista_recs = sec_rec90.get('lista_recomendaciones_textos', [])
-    is_placeholder_rec90 = not lista_recs or \
-                           (lista_recs and "(Placeholder:" in lista_recs[0]) or \
-                           "(Placeholder:" in sec_rec90.get('parrafo_intro_texto', "")
-    if is_placeholder_rec90:
-        st.info(sec_rec90.get('parrafo_intro_texto', texto_sesion_trabajo)) 
-    else:
-        st.write(sec_rec90.get('parrafo_intro_texto', ""))
-        for item in lista_recs: st.markdown(f"• {item}")
-    st.markdown("---")
+    st.markdown("---") # Esta línea de separación es correcta
+    
     sec_sesion = data.get("propuesta_sesion_acompanamiento_data", {})
     st.subheader(sec_sesion.get('subtitulo_texto', "B. Propuesta de Sesión de Trabajo y Acompañamiento"))
     st.write(sec_sesion.get('parrafo1_texto', 
@@ -718,7 +707,6 @@ def render_conclusiones(data):
     st.subheader(sec_agrad.get('subtitulo_texto', "C. Agradecimiento Final"))
     st.write(sec_agrad.get('parrafo_texto', 
              "Agradecemos sinceramente a todo el equipo por su tiempo, apertura y colaboración durante el proceso de diagnóstico."))
-
 
 # --- 5. ÁREA PRINCIPAL ---
 if st.session_state.json_data is None:
