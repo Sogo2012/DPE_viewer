@@ -47,7 +47,7 @@ CSS_STYLES = f"""
         justify-content: center !important;
         
         border-radius: 8px 8px 0px 0px !important; 
-        padding: 6px 8px !important; /* Padding ajustado (vertical 6px, horizontal 8px) */
+        padding: 6px 6px !important; /* Padding ajustado (vertical 6px, horizontal 8px) */
         font-weight: 500 !important;
         font-size: 10px !important; /* Tamaño de fuente reducido */
         line-height: 1.25 !important; /* Altura de línea ajustada */
