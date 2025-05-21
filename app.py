@@ -22,13 +22,14 @@ COLOR_TEXTO_SUB_SUBTITULO_CSS = COLOR_GRIS_ECO
 COLOR_TEXTO_CUERPO_CSS = "#333333"
 COLOR_TEXTO_SUTIL_CSS = "#7f8c8d"
 COLOR_TEXTO_BLANCO_CSS = "#FFFFFF"
+# ESTE ES EL BLOQUE CORRECTO PARA REEMPLAZAR LA ASIGNACIÓN DE CSS_STYLES
 CSS_STYLES = f"""
 <style>
     /* === ESTILOS PARA PESTAÑAS (st.tabs) === */
 
     /* Contenedor de la lista de pestañas */
     div[data-baseweb="tab-list"] {{
-        gap: 8px !important; /* Espacio entre pestañas aún más reducido */
+        gap: 8px !important; /* Espacio entre pestañas reducido */
         border-bottom: 3px solid transparent !important; 
         padding-bottom: 0px !important; 
     }}
@@ -36,24 +37,24 @@ CSS_STYLES = f"""
     /* Pestaña individual (botón) */
     div[data-baseweb="tab-list"] button[data-baseweb="tab"] {{
         height: auto !important; 
-        min-height: 48px; /* Ligeramente más alto para acomodar dos líneas de texto cómodamente */
-        white-space: normal !important;
-        overflow-wrap: anywhere; /* Más agresivo que break-word, puede romper en cualquier parte */
-        hyphens: manual; /* Evitar guiones automáticos que pueden no ser perfectos */
-        text-align: center !important;
-        display: flex !important;
+        min-height: 48px; /* Altura para acomodar dos líneas */
+        white-space: normal !important; /* Permitir múltiples líneas */
+        overflow-wrap: anywhere; /* Romper palabras largas si es necesario */
+        hyphens: manual; /* Desactivar guiones automáticos */
+        text-align: center !important; /* Centrar texto */
+        display: flex !important; /* Para centrado vertical/horizontal */
         align-items: center !important;
         justify-content: center !important;
         
         border-radius: 8px 8px 0px 0px !important; 
-        padding: 6px 8px !important; /* Padding vertical reducido, horizontal también reducido */
+        padding: 6px 8px !important; /* Padding ajustado (vertical 6px, horizontal 8px) */
         font-weight: 500 !important;
-        font-size: 12px !important; /* Tamaño de fuente en píxeles para control más fino (aprox 0.75rem) */
-        line-height: 1.3 !important; /* Ajuste ligero para mejor legibilidad con dos líneas */
+        font-size: 11px !important; /* Tamaño de fuente reducido */
+        line-height: 1.25 !important; /* Altura de línea ajustada */
         
         border: none !important; /* Quitar todos los bordes por defecto */
         border-bottom: 3px solid transparent !important; /* Borde inferior transparente por defecto */
-        margin-bottom: -3px !important; 
+        margin-bottom: -3px !important; /* Compensar borde del contenedor */
         
         transition: background-color 0.2s ease, color 0.2s ease, border-bottom-color 0.2s ease !important;
     }}
@@ -62,9 +63,9 @@ CSS_STYLES = f"""
     div[data-baseweb="tab-list"] button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {{
         color: {COLOR_TEXTO_BLANCO_CSS} !important; 
         margin-bottom: 0 !important; 
-        line-height: inherit !important; /* Heredar del botón */
-        font-size: inherit !important; /* Heredar del botón */
-        font-weight: inherit !important; /* Heredar del botón */
+        line-height: inherit !important; 
+        font-size: inherit !important; 
+        font-weight: inherit !important; 
     }}
     
     /* Pestaña individual (NO ACTIVA) */
@@ -75,7 +76,7 @@ CSS_STYLES = f"""
     /* Pestaña individual (ACTIVA) */
     div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"] {{
         background-color: {COLOR_AZUL_ECO} !important; 
-        font-weight: 700 !important; /* Un poco más de énfasis para la activa */
+        font-weight: 700 !important; 
         border-bottom-color: {COLOR_VERDE_ECO} !important; 
     }}
 
