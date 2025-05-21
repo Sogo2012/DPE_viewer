@@ -1,32 +1,91 @@
-import streamlit as st # Asegúrate de tenerlo al inicio de tu app.py
+import streamlit as st
+import json
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-import json # Para el GeoJSON
-# Importaciones para la función de GeoJSON (si la usas como te la di)
-import requests
-import zipfile
-import io
+from PIL import Image
+# import io # No se usa directamente
+import datetime
+import base64
+import os
+import requests # Para la función de GeoJSON
+import zipfile # Para la función de GeoJSON
+import io      # Para la función de GeoJSON
 
-# Definiciones de color (asegúrate que estén disponibles globalmente en tu app.py)
+# --- DEFINICIÓN DE COLORES Y CSS AL INICIO ---
 COLOR_AZUL_ECO = "#173D4A"
 COLOR_VERDE_ECO = "#66913E"
 COLOR_GRIS_ECO = "#414549"
+COLOR_TEXTO_TITULO_PRINCIPAL_CSS = COLOR_AZUL_ECO
+COLOR_TEXTO_SUBTITULO_SECCION_CSS = COLOR_VERDE_ECO
+COLOR_TEXTO_SUB_SUBTITULO_CSS = COLOR_GRIS_ECO
 COLOR_TEXTO_CUERPO_CSS = "#333333"
+COLOR_TEXTO_SUTIL_CSS = "#7f8c8d"
+COLOR_TEXTO_BLANCO_CSS = "#FFFFFF"
 
-# --- INICIO DE LA FUNCIÓN ---
-# URL del GeoJSON de GADM para Costa Rica (Provincias) - Coloca esto al inicio de tu script app.py
+CSS_STYLES = f"""
+<style>
+    /* === ESTILOS PARA PESTAÑAS (st.tabs) - PRUEBA CON VALORES FIJOS === */
+    div[data-baseweb="tab-list"] {{
+        gap: 12px !important;
+        border-bottom: 3px solid transparent !important;
+        padding-bottom: 0px !important;
+    }}
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"] {{
+        height: auto !important;
+        min-height: 45px;
+        white-space: normal !important;
+        word-break: break-word;
+        background-color: {COLOR_GRIS_ECO} !important;
+        color: {COLOR_TEXTO_BLANCO_CSS} !important;
+        border-radius: 8px 8px 0px 0px !important;
+        padding: 10px 15px !important;
+        font-weight: 500 !important;
+        font-size: 0.88rem !important;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: 3px solid transparent !important;
+        margin-bottom: -3px !important;
+        transition: background-color 0.2s ease, color 0.2s ease, border-bottom-color 0.2s ease !important;
+    }}
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {{
+        color: {COLOR_TEXTO_BLANCO_CSS} !important;
+        margin-bottom: 0 !important;
+    }}
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="false"] {{
+        background-color: {COLOR_GRIS_ECO} !important;
+    }}
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"] {{
+        background-color: {COLOR_AZUL_ECO} !important;
+        font-weight: bold !important;
+        border-bottom-color: {COLOR_VERDE_ECO} !important;
+    }}
+    div[data-baseweb="tab-list"] > div {{
+        border-bottom: none !important;
+    }}
+    /* === FIN ESTILOS PARA PESTAÑAS === */
+
+    /* Estilos generales */
+    h1 {{ color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS}; padding-bottom: 0.5rem; border-bottom: 3px solid {COLOR_AZUL_ECO}; }}
+    h2 {{ color: {COLOR_TEXTO_SUBTITULO_SECCION_CSS}; border-bottom: 2px solid {COLOR_VERDE_ECO}; padding-bottom: 0.3rem; margin-top: 2rem; }}
+    h3 {{ color: {COLOR_TEXTO_SUB_SUBTITULO_CSS}; margin-top: 1.5rem; }}
+    p, div, span, li, .stMarkdown {{ color: {COLOR_TEXTO_CUERPO_CSS}; line-height: 1.6; }}
+    .stCaption {{ color: {COLOR_TEXTO_SUTIL_CSS}; }}
+    hr {{ margin-top: 0.5rem; margin-bottom: 1rem; border: 0; border-top: 1px solid #D5D8DC; }}
+</style>
+"""
+# --- FIN DEFINICIÓN DE COLORES Y CSS ---
+
+
+# URL del GeoJSON de GADM para Costa Rica (Provincias)
 URL_GEOJSON_GADM_PROVINCIAS_CR_ZIP = "https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_CRI_1.json.zip"
-GEOJSON_FILENAME = "gadm41_CRI_1.json" # Nombre del archivo dentro del ZIP
+GEOJSON_FILENAME = "gadm41_CRI_1.json"
 
-@st.cache_data(ttl=60*60*24) # Cachear por 24 horas
+@st.cache_data(ttl=60*60*24)
 def load_geojson_costa_rica():
-    """
-    Descarga, descomprime y carga el archivo GeoJSON de las provincias de Costa Rica.
-    Retorna el contenido del GeoJSON como un diccionario Python.
-    """
+    # ... (código de la función sin cambios)
     try:
-        # print(f"Intentando descargar GeoJSON desde: {URL_GEOJSON_GADM_PROVINCIAS_CR_ZIP}")
         response = requests.get(URL_GEOJSON_GADM_PROVINCIAS_CR_ZIP, stream=True, timeout=30)
         response.raise_for_status()
         zip_in_memory = io.BytesIO(response.content)
@@ -34,24 +93,263 @@ def load_geojson_costa_rica():
             if GEOJSON_FILENAME in zip_ref.namelist():
                 with zip_ref.open(GEOJSON_FILENAME) as geojson_file:
                     geojson_data = json.load(geojson_file)
-                # print("GeoJSON de Costa Rica cargado y cacheado exitosamente.")
                 return geojson_data
             else:
                 st.error(f"Archivo '{GEOJSON_FILENAME}' no encontrado dentro del ZIP descargado.")
-                # print(f"Error: Archivo '{GEOJSON_FILENAME}' no en ZIP. Contenido del ZIP: {zip_ref.namelist()}")
                 return None
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error al descargar el archivo GeoJSON: {e}")
-        # print(f"Error descargando GeoJSON: {e}")
-        return None
-    except zipfile.BadZipFile:
-        st.error("El archivo descargado no es un ZIP válido.")
-        # print("Error: El archivo descargado no es un ZIP válido.")
-        return None
     except Exception as e:
-        st.error(f"Un error inesperado ocurrió al procesar el GeoJSON: {e}")
-        # print(f"Error inesperado procesando GeoJSON: {e}")
+        st.error(f"Error procesando GeoJSON: {e}")
         return None
+
+# --- 1. CONFIGURACIÓN DE LA PÁGINA ---
+APP_TITLE = "Visualizador Avanzado de Informes DPE - ECO Consultores"
+LOGO_FILENAME = "Logo_ECO.png"
+LOGO_DIRECTORY = "assets"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+LOGO_PATH = os.path.join(SCRIPT_DIR, LOGO_DIRECTORY, LOGO_FILENAME)
+logo_exists_at_path = os.path.exists(LOGO_PATH)
+
+def get_image_as_base64(path):
+    # ... (código de la función sin cambios)
+    if not os.path.exists(path): return None
+    try:
+        with open(path, "rb") as img_file: return base64.b64encode(img_file.read()).decode()
+    except Exception: return None
+
+logo_base64 = get_image_as_base64(LOGO_PATH)
+page_icon_img_to_set = "📊"
+if logo_exists_at_path:
+    try: page_icon_img_to_set = Image.open(LOGO_PATH)
+    except Exception: pass
+
+st.set_page_config(
+    page_title=APP_TITLE,
+    page_icon=page_icon_img_to_set,
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'mailto:soporte@ecoconsultores.com',
+        'Report a bug': "mailto:soporte@ecoconsultores.com",
+        'About': f"### {APP_TITLE}\nVersión 1.2\n\nDesarrollado con Streamlit."
+    }
+)
+
+# APLICAR EL CSS DESPUÉS DE st.set_page_config
+st.markdown(CSS_STYLES, unsafe_allow_html=True)
+
+
+# --- 3. ESTADO DE LA APLICACIÓN ---
+# ... (tu código de inicialización de session_state se mantiene igual) ...
+if 'json_data' not in st.session_state:
+    st.session_state.json_data = None
+if 'nombre_cliente' not in st.session_state:
+    st.session_state.nombre_cliente = "Cliente"
+if 'error_carga' not in st.session_state:
+    st.session_state.error_carga = None
+if 'show_json_data' not in st.session_state:
+    st.session_state.show_json_data = False
+
+# --- 4. BARRA LATERAL ---
+# ... (tu código de la barra lateral se mantiene igual) ...
+with st.sidebar:
+    if logo_base64:
+        st.markdown(
+            f'<div style="display: flex; justify-content: center; padding-bottom:10px;"><img src="data:image/png;base64,{logo_base64}" alt="Logo ECO Consultores" style="max-width: 80%; height: auto;"></div>',
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(f"<h2 style='color:{COLOR_AZUL_ECO}; text-align:center;'>ECO Consultores</h2>", unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.header("Cargar Informe DPE")
+    uploaded_file = st.file_uploader(
+        "Seleccione el archivo JSON:",
+        type=["json"],
+        key="dpe_json_uploader",
+        help="Arrastre y suelte un archivo JSON o haga clic para seleccionar."
+    )
+
+    if uploaded_file is not None:
+        with st.spinner("Procesando archivo JSON..."):
+            try:
+                string_data = uploaded_file.getvalue().decode("utf-8")
+                if string_data.startswith('\ufeff'):
+                    string_data = string_data.lstrip('\ufeff')
+                st.session_state.json_data = json.loads(string_data)
+                st.session_state.error_carga = None
+                if st.session_state.json_data and "metadatos_informe" in st.session_state.json_data:
+                    nombre_cliente_json = st.session_state.json_data["metadatos_informe"].get("cliente_nombre")
+                    st.session_state.nombre_cliente = nombre_cliente_json if nombre_cliente_json else "Cliente (Nombre no en JSON)"
+                else:
+                    st.session_state.nombre_cliente = "Cliente (Metadatos no en JSON)"
+                st.success(f"✓ Archivo '{uploaded_file.name}' cargado para {st.session_state.nombre_cliente}.")
+            except json.JSONDecodeError as jde:
+                st.session_state.error_carga = f"Error de Decodificación: El archivo no es un JSON válido. Detalle: {jde}"
+                st.session_state.json_data = None
+                st.error(st.session_state.error_carga) 
+            except Exception as e:
+                st.session_state.error_carga = f"Error Crítico al procesar: {str(e)}."
+                st.session_state.json_data = None
+                st.error(st.session_state.error_carga) 
+
+    if st.session_state.get('json_data', None): # Usar .get()
+        st.markdown("---")
+        if st.button("🧹 Limpiar Datos y Reiniciar"):
+            keys_to_delete = list(st.session_state.keys())
+            for key in keys_to_delete:
+                del st.session_state[key]
+            # Re-inicializar estados básicos AHORA SÍ ANTES DEL RERUN
+            st.session_state.json_data = None
+            st.session_state.nombre_cliente = "Cliente"
+            st.session_state.error_carga = None
+            st.session_state.show_json_data = False
+            st.rerun()
+        st.session_state.show_json_data = st.toggle("Mostrar datos JSON crudos", value=st.session_state.get('show_json_data', False))
+
+
+# --- DEFINICIONES DE FUNCIONES DE RENDERIZADO ---
+# ... (TODAS TUS FUNCIONES render_portada, render_glosario, render_resumen_ejecutivo, 
+#      render_introduccion_contexto, render_analisis_externo (con la corrección de gráficos CFIA),
+#      render_diagnostico_interno, render_sintesis_foda, render_formulacion_estrategica,
+#      render_hoja_ruta, render_implementacion, render_conclusiones (con la corrección de duplicación)
+#      VAN AQUÍ SIN CAMBIOS INTERNOS, solo asegúrate que las variables de color que usen
+#      estén definidas globalmente o sean pasadas como argumentos si es necesario)
+#      Por brevedad, no las repito aquí, pero deben estar en tu archivo.
+#      Solo he puesto la función render_analisis_externo como ejemplo de que va aquí.
+# -------------------------------------------------------------------------------------
+def render_portada(data):
+    st.markdown(f"<div style='padding: 20px; text-align:center;'>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS}; font-size: 2.5em; margin-top: 50px;'>{data.get('titulo_principal_texto', 'Título Portada')}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p style='font-size: 1.8em; color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS};'>{data.get('preparado_para_texto', 'Preparado para:')} <b style='color:{COLOR_VERDE_ECO}'>{data.get('nombre_cliente_texto', st.session_state.nombre_cliente)}</b></p>", unsafe_allow_html=True)
+    
+    metadatos_informe_local = {}
+    if st.session_state.json_data and "metadatos_informe" in st.session_state.json_data:
+         metadatos_informe_local = st.session_state.json_data["metadatos_informe"]
+    
+    st.markdown(f"<p style='font-size: 1.1em; color: {COLOR_GRIS_ECO}; margin-bottom: 100px;'>{data.get('fecha_diagnostico_texto', metadatos_informe_local.get('fecha_diagnostico', 'N/A'))}</p>", unsafe_allow_html=True)
+
+    if logo_exists_at_path:
+        try:
+            st.image(LOGO_PATH, width=250)
+        except Exception as e:
+            st.markdown(f"<p style='font-size: 0.8em; color: {COLOR_TEXTO_SUTIL_CSS};'>(Error al mostrar logo de portada con st.image: {e}. Ruta: {LOGO_PATH})</p>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<p style='font-size: 0.8em; color: {COLOR_TEXTO_SUTIL_CSS};'>(Logo de portada no encontrado en '{LOGO_PATH}')</p>", unsafe_allow_html=True)
+
+    st.markdown(f"<p style='font-size: 0.9em; color: {COLOR_GRIS_ECO}; margin-top: 100px;'>{data.get('footer_linea1_texto', 'Un informe de ECO Consultores')}</p>", unsafe_allow_html=True)
+    version_dpe_info = metadatos_informe_local.get("version_dpe", "N/A")
+    default_footer_line2_text = f'Herramienta DPE {version_dpe_info}'
+    footer_line2_content = data.get('footer_linea2_texto', default_footer_line2_text)
+    st.markdown(f"<p style='font-size: 0.9em; color: {COLOR_GRIS_ECO};'>{footer_line2_content}</p>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+def render_glosario(data):
+    st.header(data.get('titulo_seccion_texto', 'X. Glosario de Términos')) 
+    st.markdown("---")
+    if not data.get("lista_terminos_data"):
+        st.info("No hay términos en el glosario para mostrar.")
+        return
+    for item in data.get("lista_terminos_data", []):
+        term = item.get('termino_texto', 'N/A')
+        definition = item.get('definicion_texto', 'N/A')
+        with st.container():
+            st.markdown(f"**{term}**")
+            st.markdown(definition)
+            st.markdown("---")
+
+def render_resumen_ejecutivo(data_re):
+    st.header(data_re.get('titulo_seccion_texto', "I. Resumen Ejecutivo Gerencial"))
+    sec_proposito = data_re.get("proposito_alcance", {})
+    st.subheader(sec_proposito.get('subtitulo_texto', '1.1. Propósito y Alcance'))
+    st.write(sec_proposito.get('parrafo_texto', 'N/A'))
+    sec_madurez_global = data_re.get("madurez_global", {})
+    st.subheader(sec_madurez_global.get('subtitulo_texto', '1.2. Nivel de Madurez Global'))
+    st.write(sec_madurez_global.get('parrafo_texto', 'N/A'))
+    radar_data_list = sec_madurez_global.get("grafico_radar_data", [])
+    if radar_data_list and isinstance(radar_data_list, list) and len(radar_data_list) >= 3:
+        labels = [item.get('label') for item in radar_data_list if item.get('label') is not None]
+        values_str = [item.get('value') for item in radar_data_list if item.get('value') is not None]
+        values = []
+        for v_str in values_str:
+            try: values.append(float(v_str))
+            except (ValueError, TypeError): values.append(0.0) 
+        if labels and values and len(labels) == len(values):
+            fig_radar = go.Figure()
+            r_fill, g_fill, b_fill = tuple(int(COLOR_VERDE_ECO.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+            fill_color_rgba = f'rgba({r_fill}, {g_fill}, {b_fill}, 0.6)'
+            fig_radar.add_trace(go.Scatterpolar(
+                r=values + ([values[0]] if values else []), 
+                theta=labels + ([labels[0]] if labels else []), 
+                fill='toself', fillcolor=fill_color_rgba,
+                line_color=COLOR_AZUL_ECO
+            ))
+            fig_radar.update_layout(
+                polar=dict(
+                    radialaxis=dict(visible=True, range=[0, 100], ticksuffix='%', showline=True,
+                                    showticklabels=True, ticks='outside', dtick=20,
+                                    gridcolor=COLOR_GRIS_ECO, linecolor=COLOR_GRIS_ECO,
+                                    tickfont=dict(size=9, color=COLOR_GRIS_ECO)),
+                    angularaxis=dict(showline=False, ticks='outside', direction="clockwise",
+                                     tickfont=dict(size=10, color=COLOR_TEXTO_CUERPO_CSS))
+                ),
+                title=dict(text=sec_madurez_global.get("grafico_radar_titulo_sugerido", "Nivel de Madurez por Área (%)"),
+                           x=0.5, font=dict(size=16, color=COLOR_TEXTO_TITULO_PRINCIPAL_CSS)),
+                showlegend=False, height=450, margin=dict(l=50, r=50, t=80, b=50),
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color=COLOR_TEXTO_CUERPO_CSS, size=11)
+            )
+            st.plotly_chart(fig_radar, use_container_width=True)
+            st.caption(sec_madurez_global.get("grafico_radar_caption_texto", 
+                                              sec_madurez_global.get("grafico_radar_titulo_sugerido", "")))
+        else:
+            st.caption("Datos para gráfico radar incompletos o con formato incorrecto.")
+    else:
+        st.caption("Datos para gráfico radar no disponibles o insuficientes.")
+    sub_secciones_resumen = ["hallazgos_area", "foda_interno", "foda_externo", 
+                             "lineamientos_estrategicos", "conclusion_resumen_ejecutivo"]
+    for sub_key in sub_secciones_resumen:
+        sub_data = data_re.get(sub_key, {})
+        if sub_data: 
+            st.subheader(sub_data.get('subtitulo_texto', sub_key.replace("_", " ").title())) 
+            if "parrafo_texto" in sub_data: st.write(sub_data.get('parrafo_texto'))
+            if "parrafo_intro_texto" in sub_data: st.write(sub_data.get('parrafo_intro_texto'))
+            if "lista_textos_hallazgos" in sub_data:
+                for item in sub_data.get("lista_textos_hallazgos", []): st.markdown(f"• {item}")
+            if "fortalezas_lista_textos" in sub_data:
+                st.markdown(f"**{sub_data.get('fortalezas_titulo_texto','Fortalezas:')}**")
+                for item in sub_data.get("fortalezas_lista_textos", []): st.markdown(f"• {item}")
+            if "debilidades_lista_textos" in sub_data:
+                st.markdown(f"**{sub_data.get('debilidades_titulo_texto','Debilidades:')}**")
+                for item in sub_data.get("debilidades_lista_textos", []): st.markdown(f"• {item}")
+            if "oportunidades_lista_textos" in sub_data:
+                st.markdown(f"**{sub_data.get('oportunidades_titulo_texto','Oportunidades:')}**")
+                for item in sub_data.get("oportunidades_lista_textos", []): st.markdown(f"• {item}")
+            if "amenazas_lista_textos" in sub_data:
+                st.markdown(f"**{sub_data.get('amenazas_titulo_texto','Amenazas:')}**")
+                for item in sub_data.get("amenazas_lista_textos", []): st.markdown(f"• {item}")
+            if "lista_lineamientos_textos" in sub_data:
+                 for item in sub_data.get("lista_lineamientos_textos", []): st.markdown(f"• {item}")
+            st.markdown("---")
+
+def render_introduccion_contexto(data):
+    st.header(data.get('titulo_seccion_texto', "II. Introducción y Contexto del Diagnóstico"))
+    seccion_presentacion = data.get("presentacion_cliente", {})
+    st.subheader(seccion_presentacion.get('subtitulo_texto', "A. Presentación"))
+    for key, val in seccion_presentacion.items():
+        if key not in ['subtitulo_texto', 'titulo_seccion_texto'] and isinstance(val, str): 
+            st.markdown(f"**{key.replace('_texto', '').replace('_', ' ').title()}:** {val}")
+    st.markdown("---")
+    seccion_objetivos = data.get("objetivos_dpe", {})
+    st.subheader(seccion_objetivos.get('subtitulo_texto', "B. Objetivos DPE"))
+    st.write(seccion_objetivos.get('parrafo_intro_texto', ""))
+    for item in seccion_objetivos.get('lista_objetivos_textos', []): st.markdown(f"• {item}")
+    st.markdown("---")
+    seccion_alcance = data.get("alcance_metodologia", {})
+    st.subheader(seccion_alcance.get('subtitulo_texto', "C. Alcance y Metodología"))
+    st.write(seccion_alcance.get('parrafo_areas_texto', ""))
+    st.markdown(f"**{seccion_alcance.get('proceso_recoleccion_titulo_texto','Proceso de Recolección y Marco de Evaluación:')}**")
+    for item in seccion_alcance.get('lista_metodologia_textos', []): st.markdown(f"• {item}")
+    st.caption(seccion_alcance.get('parrafo_limitaciones_texto', ""))
 
 def render_analisis_externo(data): # VERSIÓN CON GRÁFICOS CFIA ADICIONALES
     st.header(data.get('titulo_seccion_texto', "III. Análisis del Entorno Externo"))
@@ -680,6 +978,7 @@ else: # Si hay datos JSON cargados
                     render_function({})
             else:
                 st.error(f"Función de renderizado no encontrada para la clave de datos: {data_key}")
+
 
 # --- 6. PIE DE PÁGINA ---
 st.markdown("<hr style='margin-top: 3rem; margin-bottom: 1rem;'>", unsafe_allow_html=True)
