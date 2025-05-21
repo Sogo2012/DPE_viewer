@@ -22,26 +22,19 @@ COLOR_TEXTO_SUB_SUBTITULO_CSS = COLOR_GRIS_ECO
 COLOR_TEXTO_CUERPO_CSS = "#333333"
 COLOR_TEXTO_SUTIL_CSS = "#7f8c8d"
 COLOR_TEXTO_BLANCO_CSS = "#FFFFFF"
-
 CSS_STYLES = f"""
 <style>
-    /* === ESTILOS PARA PESTAÑAS (st.tabs) - PRUEBA CON VALORES FIJOS === */
-    div[data-baseweb="tab-list"] {{
-        gap: 12px !important;
-        border-bottom: 3px solid transparent !important;
-        padding-bottom: 0px !important;
-    }}
     /* === ESTILOS PARA PESTAÑAS (st.tabs) === */
 
     /* Contenedor de la lista de pestañas */
-    div[data-baseweb="tab-list"] {
+    div[data-baseweb="tab-list"] {{
         gap: 8px !important; /* Espacio entre pestañas aún más reducido */
         border-bottom: 3px solid transparent !important; 
         padding-bottom: 0px !important; 
-    }
+    }}
 
     /* Pestaña individual (botón) */
-    div[data-baseweb="tab-list"] button[data-baseweb="tab"] {
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"] {{
         height: auto !important; 
         min-height: 48px; /* Ligeramente más alto para acomodar dos líneas de texto cómodamente */
         white-space: normal !important;
@@ -63,42 +56,30 @@ CSS_STYLES = f"""
         margin-bottom: -3px !important; 
         
         transition: background-color 0.2s ease, color 0.2s ease, border-bottom-color 0.2s ease !important;
-    }
+    }}
 
     /* Texto DENTRO de CUALQUIER pestaña (párrafo) */
-    div[data-baseweb="tab-list"] button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {{
         color: {COLOR_TEXTO_BLANCO_CSS} !important; 
         margin-bottom: 0 !important; 
         line-height: inherit !important; /* Heredar del botón */
         font-size: inherit !important; /* Heredar del botón */
         font-weight: inherit !important; /* Heredar del botón */
-    }
+    }}
     
     /* Pestaña individual (NO ACTIVA) */
-    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="false"] {
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="false"] {{
         background-color: {COLOR_GRIS_ECO} !important; 
-    }
+    }}
 
     /* Pestaña individual (ACTIVA) */
-    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"] {
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"] {{
         background-color: {COLOR_AZUL_ECO} !important; 
         font-weight: 700 !important; /* Un poco más de énfasis para la activa */
         border-bottom-color: {COLOR_VERDE_ECO} !important; 
-    }
+    }}
 
     /* Ajuste para el contenedor interno del tab-list */
-    div[data-baseweb="tab-list"] > div {
-        border-bottom: none !important;
-    }
-  
-    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="false"] {{
-        background-color: {COLOR_GRIS_ECO} !important;
-    }}
-    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"] {{
-        background-color: {COLOR_AZUL_ECO} !important;
-        font-weight: bold !important;
-        border-bottom-color: {COLOR_VERDE_ECO} !important;
-    }}
     div[data-baseweb="tab-list"] > div {{
         border-bottom: none !important;
     }}
