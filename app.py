@@ -31,28 +31,66 @@ CSS_STYLES = f"""
         border-bottom: 3px solid transparent !important;
         padding-bottom: 0px !important;
     }}
-    div[data-baseweb="tab-list"] button[data-baseweb="tab"] {{
-        height: auto !important;
-        min-height: 45px;
+    /* === ESTILOS PARA PESTAÑAS (st.tabs) === */
+
+    /* Contenedor de la lista de pestañas */
+    div[data-baseweb="tab-list"] {
+        gap: 8px !important; /* Espacio entre pestañas aún más reducido */
+        border-bottom: 3px solid transparent !important; 
+        padding-bottom: 0px !important; 
+    }
+
+    /* Pestaña individual (botón) */
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"] {
+        height: auto !important; 
+        min-height: 48px; /* Ligeramente más alto para acomodar dos líneas de texto cómodamente */
         white-space: normal !important;
-        word-break: break-word;
-        background-color: {COLOR_GRIS_ECO} !important;
-        color: {COLOR_TEXTO_BLANCO_CSS} !important;
-        border-radius: 8px 8px 0px 0px !important;
-        padding: 10px 15px !important;
+        overflow-wrap: anywhere; /* Más agresivo que break-word, puede romper en cualquier parte */
+        hyphens: manual; /* Evitar guiones automáticos que pueden no ser perfectos */
+        text-align: center !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        
+        border-radius: 8px 8px 0px 0px !important; 
+        padding: 6px 8px !important; /* Padding vertical reducido, horizontal también reducido */
         font-weight: 500 !important;
-        font-size: 0.88rem !important;
-        border-top: none !important;
-        border-left: none !important;
-        border-right: none !important;
-        border-bottom: 3px solid transparent !important;
-        margin-bottom: -3px !important;
+        font-size: 12px !important; /* Tamaño de fuente en píxeles para control más fino (aprox 0.75rem) */
+        line-height: 1.3 !important; /* Ajuste ligero para mejor legibilidad con dos líneas */
+        
+        border: none !important; /* Quitar todos los bordes por defecto */
+        border-bottom: 3px solid transparent !important; /* Borde inferior transparente por defecto */
+        margin-bottom: -3px !important; 
+        
         transition: background-color 0.2s ease, color 0.2s ease, border-bottom-color 0.2s ease !important;
-    }}
-    div[data-baseweb="tab-list"] button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {{
-        color: {COLOR_TEXTO_BLANCO_CSS} !important;
-        margin-bottom: 0 !important;
-    }}
+    }
+
+    /* Texto DENTRO de CUALQUIER pestaña (párrafo) */
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {
+        color: {COLOR_TEXTO_BLANCO_CSS} !important; 
+        margin-bottom: 0 !important; 
+        line-height: inherit !important; /* Heredar del botón */
+        font-size: inherit !important; /* Heredar del botón */
+        font-weight: inherit !important; /* Heredar del botón */
+    }
+    
+    /* Pestaña individual (NO ACTIVA) */
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="false"] {
+        background-color: {COLOR_GRIS_ECO} !important; 
+    }
+
+    /* Pestaña individual (ACTIVA) */
+    div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"] {
+        background-color: {COLOR_AZUL_ECO} !important; 
+        font-weight: 700 !important; /* Un poco más de énfasis para la activa */
+        border-bottom-color: {COLOR_VERDE_ECO} !important; 
+    }
+
+    /* Ajuste para el contenedor interno del tab-list */
+    div[data-baseweb="tab-list"] > div {
+        border-bottom: none !important;
+    }
+  
     div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="false"] {{
         background-color: {COLOR_GRIS_ECO} !important;
     }}
