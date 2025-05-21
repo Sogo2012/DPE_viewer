@@ -49,7 +49,7 @@ CSS_STYLES = f"""
         border-radius: 8px 8px 0px 0px !important; 
         padding: 6px 8px !important; /* Padding ajustado (vertical 6px, horizontal 8px) */
         font-weight: 500 !important;
-        font-size: 11px !important; /* Tamaño de fuente reducido */
+        font-size: 10px !important; /* Tamaño de fuente reducido */
         line-height: 1.25 !important; /* Altura de línea ajustada */
         
         border: none !important; /* Quitar todos los bordes por defecto */
