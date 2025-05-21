@@ -604,12 +604,16 @@ def render_conclusiones(data):
              "Agradecemos sinceramente a todo el equipo por su tiempo, apertura y colaboración durante el proceso de diagnóstico."))
 
 # --- 5. ÁREA PRINCIPAL ---
-# json_data_cargado = st.session_state.get('json_data', None) # ESTA LÍNEA ESTABA MAL COLOCADA EN TU ÚLTIMO ARCHIVO
 
-if st.session_state.get('json_data', None) is None: # Verificación robusta
+# Verifica si hay datos JSON cargados. Usar .get() para evitar AttributeError si la clave no existe.
+json_data_cargado = st.session_state.get('json_data', None)
+
+if json_data_cargado is None:
+    # Mostrar mensaje de error si existió un problema al cargar
     if st.session_state.get('error_carga', None):
         st.error(f"**Error al Cargar el Archivo:** {st.session_state.error_carga}")
 
+    # Mensaje de bienvenida y logo
     st.markdown(f"<h1 style='text-align: center; color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS}; margin-top: 2rem;'>Bienvenido al {APP_TITLE}</h1>", unsafe_allow_html=True)
 
     if logo_base64:
@@ -620,16 +624,15 @@ if st.session_state.get('json_data', None) is None: # Verificación robusta
     st.markdown("<p style='text-align: center; font-size: 1.2em; margin-bottom: 2rem;'>Para comenzar, por favor cargue el archivo JSON del diagnóstico DPE utilizando el panel de la izquierda.</p>", unsafe_allow_html=True)
     st.info("ℹ️ **Instrucciones:** Use el botón 'Browse files' o arrastre un archivo JSON al área designada en la barra lateral.")
 
-# ESTE 'else' DEBE ESTAR AL MISMO NIVEL QUE EL 'if' ANTERIOR
 else: # Si hay datos JSON cargados
-    json_data_main = st.session_state.get('json_data') # Ahora podemos asumir que existe si no es None
+    json_data_main = json_data_cargado # Usar la variable obtenida con .get()
     METADATOS_INFORME = json_data_main.get("metadatos_informe", {})
 
     st.markdown(f"<h1>{METADATOS_INFORME.get('titulo_informe_base','Informe DPE')} para <b>{st.session_state.nombre_cliente}</b></h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: left; color: {COLOR_TEXTO_SUTIL_CSS}; font-size: 0.9em;'>Versión DPE: {METADATOS_INFORME.get('version_dpe', 'N/A')} | Fecha Diagnóstico: {METADATOS_INFORME.get('fecha_diagnostico', 'N/A')}</p>", unsafe_allow_html=True)
     #st.markdown("<hr>") # HR extra eliminada correctamente
 
-    if st.session_state.show_json_data:
+    if st.session_state.get('show_json_data', False): # Usar .get() aquí también por seguridad
         with st.expander("Ver Datos JSON Crudos Cargados (Global)", expanded=False):
             st.json(json_data_main)
     
@@ -677,7 +680,6 @@ else: # Si hay datos JSON cargados
                     render_function({})
             else:
                 st.error(f"Función de renderizado no encontrada para la clave de datos: {data_key}")
-
 
 # --- 6. PIE DE PÁGINA ---
 st.markdown("<hr style='margin-top: 3rem; margin-bottom: 1rem;'>", unsafe_allow_html=True)
