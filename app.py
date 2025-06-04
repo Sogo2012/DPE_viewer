@@ -610,7 +610,13 @@ def render_analisis_externo(data):
             st.markdown(f"**Giro Principal Inferido:** {comp_render_data.get('giro_principal_inferido_texto', 'N/A')}")
             prods_servs_comp_render = comp_render_data.get('productos_servicios_clave_lista_textos', [])
             if prods_servs_comp_render and prods_servs_comp_render != ['N/A']:
-                st.markdown(f"**Productos/Servicios Clave:**"); [st.markdown(f"  • {ps_item_render}") for ps_item_render in prods_servs_comp_render]
+                prods_servs_comp_render = comp_render_data.get('productos_servicios_clave_lista_textos', []) # Asegúrate de que esta línea esté antes
+            if prods_servs_comp_render and prods_servs_comp_render != ['N/A']: # Verifica que haya datos
+                st.markdown(f"**Productos/Servicios Clave:**")
+                for ps_item_render in prods_servs_comp_render: # Bucle normal
+                    st.markdown(f"  • {ps_item_render}")
+            else: # Manejar el caso de que no haya productos o sea N/A
+                st.markdown(f"**Productos/Servicios Clave:** N/A")
             else: st.markdown(f"**Productos/Servicios Clave:** N/A")
             marcas_gest_comp_render = comp_render_data.get('marcas_gestionadas_lista_textos', [])
             if marcas_gest_comp_render and marcas_gest_comp_render != ['N/A']:
