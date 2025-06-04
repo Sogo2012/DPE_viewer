@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from PIL import Image
-# import io # No se usa directamente en las funciones de renderizado de Streamlit si los datos ya están en JSON
+# import io # No se usa directamente
 import datetime
 import base64
 import os
@@ -19,38 +19,47 @@ COLOR_GRIS_ECO = "#414549"
 COLOR_TEXTO_TITULO_PRINCIPAL_CSS = COLOR_AZUL_ECO
 COLOR_TEXTO_SUBTITULO_SECCION_CSS = COLOR_VERDE_ECO
 COLOR_TEXTO_SUB_SUBTITULO_CSS = COLOR_GRIS_ECO
-COLOR_TEXTO_CUERPO_CSS = "#333333" # Un gris oscuro más legible
+COLOR_TEXTO_CUERPO_CSS = "#333333"
 COLOR_TEXTO_SUTIL_CSS = "#7f8c8d"
 COLOR_TEXTO_BLANCO_CSS = "#FFFFFF"
-
+# ESTE ES EL BLOQUE CORRECTO PARA REEMPLAZAR LA ASIGNACIÓN DE CSS_STYLES
 CSS_STYLES = f"""
 <style>
     /* === ESTILOS PARA PESTAÑAS (st.tabs) === */
+
+    /* Contenedor de la lista de pestañas */
     div[data-baseweb="tab-list"] {{
-        gap: 8px !important; 
+        gap: 8px !important; /* Espacio entre pestañas reducido */
         border-bottom: 3px solid transparent !important; 
         padding-bottom: 0px !important; 
     }}
+
+    /* Pestaña individual (botón) */
     div[data-baseweb="tab-list"] button[data-baseweb="tab"] {{
         height: auto !important; 
-        min-height: 48px;
-        white-space: normal !important; 
-        overflow-wrap: anywhere; 
-        hyphens: manual; 
-        text-align: center !important; 
-        display: flex !important; 
+        min-height: 48px; /* Altura para acomodar dos líneas */
+        white-space: normal !important; /* Permitir múltiples líneas */
+        overflow-wrap: anywhere; /* Romper palabras largas si es necesario */
+        hyphens: manual; /* Desactivar guiones automáticos */
+        text-align: center !important; /* Centrar texto */
+        display: flex !important; /* Para centrado vertical/horizontal */
         align-items: center !important;
         justify-content: center !important;
+        
         border-radius: 8px 8px 0px 0px !important; 
-        padding: 6px 6px !important; 
+        padding: 6px 6px !important; /* Padding ajustado (vertical 6px, horizontal 8px) */
         font-weight: 500 !important;
-        font-size: 10px !important; 
-        line-height: 1.25 !important; 
-        border: none !important; 
-        border-bottom: 3px solid transparent !important; 
-        margin-bottom: -3px !important; 
+        font-size: 10px !important; /* Tamaño de fuente reducido */
+        line-height: 1.25 !important; /* Altura de línea ajustada */
+        
+        border: none !important; /* Quitar todos los bordes por defecto */
+        border-bottom: 3px solid transparent !important; /* Borde inferior transparente por defecto */
+        margin-bottom: -3px !important; /* Compensar borde del contenedor */
+        
         transition: background-color 0.2s ease, color 0.2s ease, border-bottom-color 0.2s ease !important;
     }}
+
+    /* Texto DENTRO de CUALQUIER pestaña (párrafo) */
     div[data-baseweb="tab-list"] button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {{
         color: {COLOR_TEXTO_BLANCO_CSS} !important; 
         margin-bottom: 0 !important; 
@@ -58,19 +67,26 @@ CSS_STYLES = f"""
         font-size: inherit !important; 
         font-weight: inherit !important; 
     }}
+    
+    /* Pestaña individual (NO ACTIVA) */
     div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="false"] {{
         background-color: {COLOR_GRIS_ECO} !important; 
     }}
+
+    /* Pestaña individual (ACTIVA) */
     div[data-baseweb="tab-list"] button[data-baseweb="tab"][aria-selected="true"] {{
         background-color: {COLOR_AZUL_ECO} !important; 
         font-weight: 700 !important; 
         border-bottom-color: {COLOR_VERDE_ECO} !important; 
     }}
+
+    /* Ajuste para el contenedor interno del tab-list */
     div[data-baseweb="tab-list"] > div {{
         border-bottom: none !important;
     }}
     /* === FIN ESTILOS PARA PESTAÑAS === */
 
+    /* Estilos generales */
     h1 {{ color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS}; padding-bottom: 0.5rem; border-bottom: 3px solid {COLOR_AZUL_ECO}; }}
     h2 {{ color: {COLOR_TEXTO_SUBTITULO_SECCION_CSS}; border-bottom: 2px solid {COLOR_VERDE_ECO}; padding-bottom: 0.3rem; margin-top: 2rem; }}
     h3 {{ color: {COLOR_TEXTO_SUB_SUBTITULO_CSS}; margin-top: 1.5rem; }}
@@ -86,8 +102,9 @@ CSS_STYLES = f"""
 URL_GEOJSON_GADM_PROVINCIAS_CR_ZIP = "https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_CRI_1.json.zip"
 GEOJSON_FILENAME = "gadm41_CRI_1.json"
 
-@st.cache_data(ttl=60*60*24) # Cachear por 24 horas
+@st.cache_data(ttl=60*60*24)
 def load_geojson_costa_rica():
+    # ... (código de la función sin cambios)
     try:
         response = requests.get(URL_GEOJSON_GADM_PROVINCIAS_CR_ZIP, stream=True, timeout=30)
         response.raise_for_status()
@@ -108,16 +125,12 @@ def load_geojson_costa_rica():
 APP_TITLE = "Visualizador Avanzado de Informes DPE - ECO Consultores"
 LOGO_FILENAME = "Logo_ECO.png"
 LOGO_DIRECTORY = "assets"
-
-# Obtener la ruta del script para que funcione localmente y en Streamlit Cloud
-try:
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-except NameError: # __file__ no está definido en algunos entornos interactivos
-    SCRIPT_DIR = os.getcwd()
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOGO_PATH = os.path.join(SCRIPT_DIR, LOGO_DIRECTORY, LOGO_FILENAME)
 logo_exists_at_path = os.path.exists(LOGO_PATH)
 
 def get_image_as_base64(path):
+    # ... (código de la función sin cambios)
     if not os.path.exists(path): return None
     try:
         with open(path, "rb") as img_file: return base64.b64encode(img_file.read()).decode()
@@ -135,15 +148,18 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        'Get Help': 'mailto:soporte@ecoconsultores.com', # Ajustar si es necesario
-        'Report a bug': "mailto:soporte@ecoconsultores.com", # Ajustar si es necesario
-        'About': f"### {APP_TITLE}\nVersión 1.2.1\n\nDesarrollado con Streamlit." # Actualizar versión si es necesario
+        'Get Help': 'mailto:soporte@ecoconsultores.com',
+        'Report a bug': "mailto:soporte@ecoconsultores.com",
+        'About': f"### {APP_TITLE}\nVersión 1.2\n\nDesarrollado con Streamlit."
     }
 )
 
+# APLICAR EL CSS DESPUÉS DE st.set_page_config
 st.markdown(CSS_STYLES, unsafe_allow_html=True)
 
+
 # --- 3. ESTADO DE LA APLICACIÓN ---
+# ... (tu código de inicialización de session_state se mantiene igual) ...
 if 'json_data' not in st.session_state:
     st.session_state.json_data = None
 if 'nombre_cliente' not in st.session_state:
@@ -154,6 +170,7 @@ if 'show_json_data' not in st.session_state:
     st.session_state.show_json_data = False
 
 # --- 4. BARRA LATERAL ---
+# ... (tu código de la barra lateral se mantiene igual) ...
 with st.sidebar:
     if logo_base64:
         st.markdown(
@@ -168,7 +185,7 @@ with st.sidebar:
     uploaded_file = st.file_uploader(
         "Seleccione el archivo JSON:",
         type=["json"],
-        key="dpe_json_uploader", # Clave única para el widget
+        key="dpe_json_uploader",
         help="Arrastre y suelte un archivo JSON o haga clic para seleccionar."
     )
 
@@ -176,7 +193,7 @@ with st.sidebar:
         with st.spinner("Procesando archivo JSON..."):
             try:
                 string_data = uploaded_file.getvalue().decode("utf-8")
-                if string_data.startswith('\ufeff'): # Manejar BOM
+                if string_data.startswith('\ufeff'):
                     string_data = string_data.lstrip('\ufeff')
                 st.session_state.json_data = json.loads(string_data)
                 st.session_state.error_carga = None
@@ -188,20 +205,20 @@ with st.sidebar:
                 st.success(f"✓ Archivo '{uploaded_file.name}' cargado para {st.session_state.nombre_cliente}.")
             except json.JSONDecodeError as jde:
                 st.session_state.error_carga = f"Error de Decodificación: El archivo no es un JSON válido. Detalle: {jde}"
-                st.session_state.json_data = None # Limpiar datos en caso de error
-                st.error(st.session_state.error_carga)
+                st.session_state.json_data = None
+                st.error(st.session_state.error_carga) 
             except Exception as e:
                 st.session_state.error_carga = f"Error Crítico al procesar: {str(e)}."
-                st.session_state.json_data = None # Limpiar datos en caso de error
-                st.error(st.session_state.error_carga)
+                st.session_state.json_data = None
+                st.error(st.session_state.error_carga) 
 
-    if st.session_state.get('json_data'):
+    if st.session_state.get('json_data', None): # Usar .get()
         st.markdown("---")
         if st.button("🧹 Limpiar Datos y Reiniciar"):
-            keys_to_delete = list(st.session_state.keys()) # Evitar error de modificar dict durante iteración
+            keys_to_delete = list(st.session_state.keys())
             for key in keys_to_delete:
                 del st.session_state[key]
-            # Re-inicializar estados básicos para asegurar limpieza
+            # Re-inicializar estados básicos AHORA SÍ ANTES DEL RERUN
             st.session_state.json_data = None
             st.session_state.nombre_cliente = "Cliente"
             st.session_state.error_carga = None
@@ -211,9 +228,16 @@ with st.sidebar:
 
 
 # --- DEFINICIONES DE FUNCIONES DE RENDERIZADO ---
-
+# ... (TODAS TUS FUNCIONES render_portada, render_glosario, render_resumen_ejecutivo, 
+#      render_introduccion_contexto, render_analisis_externo (con la corrección de gráficos CFIA),
+#      render_diagnostico_interno, render_sintesis_foda, render_formulacion_estrategica,
+#      render_hoja_ruta, render_implementacion, render_conclusiones (con la corrección de duplicación)
+#      VAN AQUÍ SIN CAMBIOS INTERNOS, solo asegúrate que las variables de color que usen
+#      estén definidas globalmente o sean pasadas como argumentos si es necesario)
+#      Por brevedad, no las repito aquí, pero deben estar en tu archivo.
+#      Solo he puesto la función render_analisis_externo como ejemplo de que va aquí.
+# -------------------------------------------------------------------------------------
 def render_portada(data):
-    # ... (tu código de render_portada se mantiene igual) ...
     st.markdown(f"<div style='padding: 20px; text-align:center;'>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS}; font-size: 2.5em; margin-top: 50px;'>{data.get('titulo_principal_texto', 'Título Portada')}</h2>", unsafe_allow_html=True)
     st.markdown(f"<p style='font-size: 1.8em; color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS};'>{data.get('preparado_para_texto', 'Preparado para:')} <b style='color:{COLOR_VERDE_ECO}'>{data.get('nombre_cliente_texto', st.session_state.nombre_cliente)}</b></p>", unsafe_allow_html=True)
@@ -240,7 +264,6 @@ def render_portada(data):
     st.markdown("</div>", unsafe_allow_html=True)
 
 def render_glosario(data):
-    # ... (tu código de render_glosario se mantiene igual) ...
     st.header(data.get('titulo_seccion_texto', 'X. Glosario de Términos')) 
     st.markdown("---")
     if not data.get("lista_terminos_data"):
@@ -255,7 +278,6 @@ def render_glosario(data):
             st.markdown("---")
 
 def render_resumen_ejecutivo(data_re):
-    # ... (tu código de render_resumen_ejecutivo se mantiene igual) ...
     st.header(data_re.get('titulo_seccion_texto', "I. Resumen Ejecutivo Gerencial"))
     sec_proposito = data_re.get("proposito_alcance", {})
     st.subheader(sec_proposito.get('subtitulo_texto', '1.1. Propósito y Alcance'))
@@ -330,7 +352,6 @@ def render_resumen_ejecutivo(data_re):
             st.markdown("---")
 
 def render_introduccion_contexto(data):
-    # ... (tu código de render_introduccion_contexto se mantiene igual) ...
     st.header(data.get('titulo_seccion_texto', "II. Introducción y Contexto del Diagnóstico"))
     seccion_presentacion = data.get("presentacion_cliente", {})
     st.subheader(seccion_presentacion.get('subtitulo_texto', "A. Presentación"))
@@ -350,33 +371,19 @@ def render_introduccion_contexto(data):
     for item in seccion_alcance.get('lista_metodologia_textos', []): st.markdown(f"• {item}")
     st.caption(seccion_alcance.get('parrafo_limitaciones_texto', ""))
 
-# ***** INICIO DE LA FUNCIÓN MODIFICADA render_analisis_externo *****
-def render_analisis_externo(data):
-    st.header(data.get('titulo_seccion_analisis_externo_texto', "III. Análisis del Entorno Externo")) # Usar la clave principal
-    st.markdown("---")
+def render_analisis_externo(data): # VERSIÓN CON GRÁFICOS CFIA ADICIONALES
+    st.header(data.get('titulo_seccion_texto', "III. Análisis del Entorno Externo"))
+    
+    # --- A. Análisis del Macroentorno (BCCR) ---
+    sec_macro = data.get("macroentorno", {})
+    st.subheader(sec_macro.get('subtitulo_texto', "A. Análisis del Macroentorno"))
+    st.write(sec_macro.get('parrafo_intro_indicadores_texto', ""))
 
-    # --- A. Análisis del Macroentorno (PESTEL y BCCR) ---
-    sec_macro = data.get("macroentorno_data", {}) # Acceder al sub-diccionario
-    st.subheader(sec_macro.get('titulo_subseccion_texto', "A. Análisis del Macroentorno"))
-
-    factores_pestel_lista = sec_macro.get("factores_pestel_lista_objetos", [])
-    if factores_pestel_lista:
-        for factor_obj in factores_pestel_lista:
-            st.markdown(f"**{factor_obj.get('titulo_factor_texto', 'Factor Desconocido')}:** {factor_obj.get('descripcion_factor_texto', 'N/A')}")
-        st.markdown("---")
-    elif "A. Análisis del Macroentorno (PESTEL)" in sec_macro.get('titulo_subseccion_texto', ""): # Solo mostrar si PESTEL se esperaba
-        st.info("Análisis PESTEL detallado no disponible en el JSON cargado.")
-
-    st.markdown(f"**{sec_macro.get('indicadores_bccr_titulo_texto', 'Indicadores Económicos Clave (BCCR)')}**")
-    st.write(sec_macro.get('indicadores_bccr_descripcion_texto', "Visualización de indicadores."))
-
-    datos_bccr_json = sec_macro.get("grafico_bccr_data", [])
-    if datos_bccr_json and isinstance(datos_bccr_json, list) and not (len(datos_bccr_json) == 1 and datos_bccr_json[0].get("Error")):
-        df_bccr = pd.DataFrame(datos_bccr_json)
+    if "grafico_bccr_data" in sec_macro and sec_macro["grafico_bccr_data"] and isinstance(sec_macro["grafico_bccr_data"], list) and len(sec_macro["grafico_bccr_data"]) > 0 and not (len(sec_macro["grafico_bccr_data"])==1 and sec_macro["grafico_bccr_data"][0].get("Error")):
+        df_bccr = pd.DataFrame(sec_macro["grafico_bccr_data"])
         if not df_bccr.empty and 'Fecha' in df_bccr.columns:
             try:
-                df_bccr['Fecha'] = pd.to_datetime(df_bccr['Fecha'], errors='coerce')
-                df_bccr.dropna(subset=['Fecha'], inplace=True)
+                df_bccr['Fecha'] = pd.to_datetime(df_bccr['Fecha'])
                 tbp_col = 'Tasa_Basica_Pasiva'
                 tc_col = 'Tipo_Cambio_Venta_Referencia'
                 fig_bccr = go.Figure()
@@ -413,260 +420,248 @@ def render_analisis_externo(data):
                     st.plotly_chart(fig_bccr, use_container_width=True)
                     st.caption(sec_macro.get("grafico_bccr_caption_texto", sec_macro.get("grafico_bccr_titulo_sugerido","")))
                 else:
-                    st.info("No hay datos numéricos válidos para graficar Tasa Básica Pasiva o Tipo de Cambio del BCCR en el JSON.")
+                    st.info("No hay datos válidos para Tasa Básica Pasiva o Tipo de Cambio en el archivo JSON.")
             except Exception as e:
-                st.error(f"Error al procesar o graficar datos BCCR: {e}")
+                st.error(f"Error al procesar datos para gráfico BCCR: {e}")
         else:
-            st.info("Datos para gráfico BCCR en formato incorrecto (falta columna 'Fecha' o DataFrame vacío después de cargar).")
+            st.info("Datos para gráfico BCCR no disponibles o en formato incorrecto (falta columna 'Fecha' o datos vacíos).")
     else:
-        st.info("No se encontraron datos para el gráfico BCCR en 'macroentorno_data' o los datos son inválidos/con error en el JSON.")
+        st.info("No se encontraron datos para el gráfico BCCR en 'macroentorno' o los datos son inválidos.")
     st.markdown("---")
 
     # --- B. Análisis del Sector/Industria (CFIA) ---
-    sec_cfia = data.get("sector_industria_data", {}) # Acceder al sub-diccionario
-    st.subheader(sec_cfia.get('titulo_subseccion_texto', "B. Análisis del Sector/Industria (Construcción Costa Rica)"))
-    st.write(sec_cfia.get('intro_sector_texto', ""))
+    sec_cfia = data.get("sector_industria_cfia", {})
+    st.subheader(sec_cfia.get('subtitulo_texto', "B. Análisis del Sector/Industria (Construcción Costa Rica)"))
+    st.write(sec_cfia.get('parrafo_intro_texto', ""))
 
     # 1. Gráfico de Tendencia M² CFIA
     tend_data = sec_cfia.get("grafico_tendencia_m2_data", {})
-    if tend_data and isinstance(tend_data, dict) and \
-       not (tend_data.get("historico",[]) == [] and \
-            tend_data.get("actual_real",[]) == [] and \
-            (tend_data.get("actual_proyeccion",[]) == [] or (len(tend_data.get("actual_proyeccion",[]))==1 and tend_data.get("actual_proyeccion",[{}])[0].get("Error")) ) ):
+    # Condición más robusta para verificar si hay datos para el gráfico de tendencia
+    if tend_data and (tend_data.get("historico") or tend_data.get("actual_real") or tend_data.get("actual_proyeccion")):
         try:
             df_hist = pd.DataFrame(tend_data.get("historico", []))
-            df_proy_raw = pd.DataFrame(tend_data.get("actual_proyeccion", []))
-            df_real_raw = pd.DataFrame(tend_data.get("actual_real", []))
+            df_proy = pd.DataFrame(tend_data.get("actual_proyeccion", []))
+            df_real = pd.DataFrame(tend_data.get("actual_real", []))
             
             fig_tend = go.Figure()
 
             if not df_hist.empty and 'Mes' in df_hist.columns:
-                for col_hist in df_hist.columns:
-                    if col_hist != 'Mes': 
-                        df_hist[col_hist] = pd.to_numeric(df_hist[col_hist], errors='coerce')
-                        fig_tend.add_trace(go.Scatter(x=df_hist['Mes'], y=df_hist[col_hist], mode='lines+markers', name=f'Hist. {col_hist}', line=dict(width=1.5), marker=dict(size=4)))
+                for col in df_hist.columns:
+                    if col != 'Mes': 
+                        df_hist[col] = pd.to_numeric(df_hist[col], errors='coerce')
+                        fig_tend.add_trace(go.Scatter(x=df_hist['Mes'], y=df_hist[col], mode='lines+markers', name=f'Hist. {col}', line=dict(width=1.5), marker=dict(size=4)))
             
             last_real_month_name = None
             last_real_value = None
-            if not df_real_raw.empty and 'Mes' in df_real_raw.columns and 'Valor_Actual' in df_real_raw.columns:
-                df_real_raw['Valor_Actual'] = pd.to_numeric(df_real_raw['Valor_Actual'], errors='coerce')
-                df_real_plot = df_real_raw.dropna(subset=['Valor_Actual'])
-                if not df_real_plot.empty and (df_real_plot['Valor_Actual'] > 0).any():
+            if not df_real.empty and 'Mes' in df_real.columns and 'Valor_Actual' in df_real.columns:
+                df_real['Valor_Actual'] = pd.to_numeric(df_real['Valor_Actual'], errors='coerce')
+                df_real_plot = df_real.dropna(subset=['Valor_Actual'])
+                if not df_real_plot.empty:
                     fig_tend.add_trace(go.Scatter(x=df_real_plot['Mes'], y=df_real_plot['Valor_Actual'], mode='lines+markers', name='Actual Real', line=dict(color='black', width=2.5), marker=dict(size=6)))
                     last_real_month_name = df_real_plot['Mes'].iloc[-1]
                     last_real_value = df_real_plot['Valor_Actual'].iloc[-1]
 
-            if not df_proy_raw.empty and 'Mes' in df_proy_raw.columns and 'Valor_Proyeccion' in df_proy_raw.columns:
-                df_proy_raw['Valor_Proyeccion'] = pd.to_numeric(df_proy_raw['Valor_Proyeccion'], errors='coerce')
-                df_proy_for_plot = df_proy_raw.dropna(subset=['Valor_Proyeccion']).copy()
+            if not df_proy.empty and 'Mes' in df_proy.columns and 'Valor_Proyeccion' in df_proy.columns:
+                df_proy['Valor_Proyeccion'] = pd.to_numeric(df_proy['Valor_Proyeccion'], errors='coerce')
+                df_proy_for_plot = df_proy.dropna(subset=['Valor_Proyeccion']).copy()
+
                 if last_real_month_name and last_real_value is not None:
                     df_to_prepend = pd.DataFrame([{'Mes': last_real_month_name, 'Valor_Proyeccion': last_real_value}])
                     if not df_proy_for_plot.empty and df_proy_for_plot['Mes'].iloc[0] == last_real_month_name:
-                         df_proy_for_plot.drop(index=df_proy_for_plot.index[0], inplace=True)
+                         df_proy_for_plot = df_proy_for_plot[df_proy_for_plot['Mes'] != last_real_month_name]
                     df_proy_for_plot = pd.concat([df_to_prepend, df_proy_for_plot], ignore_index=True)
                     df_proy_for_plot.drop_duplicates(subset=['Mes'], keep='first', inplace=True)
-                if not df_proy_for_plot.empty and (df_proy_for_plot['Valor_Proyeccion'] > 0).any():
+
+                if not df_proy_for_plot.empty:
                      fig_tend.add_trace(go.Scatter(x=df_proy_for_plot['Mes'], y=df_proy_for_plot['Valor_Proyeccion'], mode='lines+markers', name='Proyección', line=dict(dash='dashdot', color='red', width=2.5), marker=dict(symbol='x', size=6)))
             
-            if fig_tend.data:
-                fig_tend.update_layout(
-                    title_text=sec_cfia.get("grafico_tendencia_m2_titulo_sugerido", "Tendencia M² Construidos (CFIA)"), title_x=0.5,
-                    xaxis_title='Mes', yaxis_title='M² Construidos',
-                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                    font_color=COLOR_TEXTO_CUERPO_CSS,
-                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-                )
-                st.plotly_chart(fig_tend, use_container_width=True)
-                st.caption(sec_cfia.get("grafico_tendencia_m2_caption_texto", sec_cfia.get("grafico_tendencia_m2_titulo_sugerido","")))
-            else:
-                st.info("No hay datos suficientes para generar el gráfico de tendencia CFIA con los datos proporcionados.")
-        except Exception as e_tend:
-            st.error(f"Error al generar gráfico de tendencia CFIA: {e_tend}")
+            fig_tend.update_layout(
+                title_text=sec_cfia.get("grafico_tendencia_m2_titulo_sugerido", "Tendencia M² Construidos (CFIA)"), title_x=0.5,
+                xaxis_title='Mes', yaxis_title='M² Construidos',
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                font_color=COLOR_TEXTO_CUERPO_CSS,
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            )
+            st.plotly_chart(fig_tend, use_container_width=True)
+            st.caption(sec_cfia.get("grafico_tendencia_m2_caption_texto", sec_cfia.get("grafico_tendencia_m2_titulo_sugerido","")))
+        except Exception as e:
+            st.error(f"Error al generar gráfico de tendencia CFIA: {e}")
     else:
-        st.info("Datos para gráfico de tendencia M2 (CFIA) no disponibles o incompletos en el JSON.")
+        st.info("Datos para gráfico de tendencia M2 (CFIA) no disponibles o incompletos.")
 
+    # --- INICIO NUEVOS GRÁFICOS CFIA ---
+    
     # 2. Gráfico de Variación Provincial CFIA
     var_prov_data = sec_cfia.get("grafico_variacion_provincial_data", [])
-    if var_prov_data and isinstance(var_prov_data, list) and not (len(var_prov_data) == 1 and var_prov_data[0].get("Error")):
+    if var_prov_data and isinstance(var_prov_data, list) and not (len(var_prov_data) == 1 and var_prov_data[0].get("Provincia") == "N/A"):
         df_var_prov = pd.DataFrame(var_prov_data)
         if 'Provincia' in df_var_prov.columns and 'Variacion_%' in df_var_prov.columns:
             df_var_prov['Variacion_%'] = pd.to_numeric(df_var_prov['Variacion_%'], errors='coerce')
             df_var_prov.dropna(subset=['Variacion_%'], inplace=True)
-            if not df_var_prov.empty:
-                df_var_prov = df_var_prov.sort_values(by='Variacion_%', ascending=False)
-                fig_var_prov = px.bar(df_var_prov, x='Provincia', y='Variacion_%',
-                                      title=sec_cfia.get("grafico_variacion_provincial_titulo_sugerido", "Variación M² por Provincia"),
-                                      labels={'Variacion_%': 'Variación Porcentual (%)', 'Provincia':'Provincia'},
-                                      color='Variacion_%',
-                                      color_continuous_scale=[(0, "red"),(0.48, "lightcoral"), (0.5, "lightgrey"), (0.52, "lightgreen"), (1, "green")],
-                                      color_continuous_midpoint=0)
-                fig_var_prov.update_layout(title_x=0.5, yaxis_ticksuffix="%", paper_bgcolor='rgba(0,0,0,0)', 
-                                           plot_bgcolor='rgba(0,0,0,0)', font_color=COLOR_TEXTO_CUERPO_CSS, coloraxis_showscale=False)
-                st.plotly_chart(fig_var_prov, use_container_width=True)
-                st.caption(sec_cfia.get("grafico_variacion_provincial_caption_texto", "Fuente: CFIA"))
-            else:
-                st.info("No hay datos válidos para el gráfico de variación provincial CFIA después del preprocesamiento.")
+            df_var_prov = df_var_prov.sort_values(by='Variacion_%', ascending=False)
+            
+            fig_var_prov = px.bar(df_var_prov, x='Provincia', y='Variacion_%',
+                                  title=sec_cfia.get("grafico_variacion_provincial_titulo_sugerido", "Variación M² por Provincia"),
+                                  labels={'Variacion_%': 'Variación Porcentual (%)', 'Provincia':'Provincia'},
+                                  color='Variacion_%',
+                                  color_continuous_scale=[(0, "red"), (0.45, "lightgrey"),(0.5, "lightgrey"), (0.55, "lightgrey"), (1, "green")],
+                                  color_continuous_midpoint=0)
+            fig_var_prov.update_layout(
+                title_x=0.5,
+                yaxis_ticksuffix="%",
+                paper_bgcolor='rgba(0,0,0,0)', 
+                plot_bgcolor='rgba(0,0,0,0)',
+                font_color=COLOR_TEXTO_CUERPO_CSS,
+                coloraxis_showscale=False
+            )
+            st.plotly_chart(fig_var_prov, use_container_width=True)
+            st.caption(sec_cfia.get("grafico_variacion_provincial_caption_texto", "Fuente: CFIA"))
         else:
             st.info("Datos para gráfico de variación provincial CFIA incompletos (faltan columnas 'Provincia' o 'Variacion_%').")
     else:
-        st.info("No hay datos disponibles para el gráfico de variación provincial CFIA en el JSON.")
+        st.info("No hay datos disponibles para el gráfico de variación provincial CFIA.")
 
     # 3. Mapa Coroplético M² Provincial CFIA
-    mapa_data_json = sec_cfia.get("mapa_m2_provincial_data", [])
-    if mapa_data_json and isinstance(mapa_data_json, list) and not (len(mapa_data_json) == 1 and mapa_data_json[0].get("Error")):
+    mapa_data = sec_cfia.get("mapa_m2_provincial_data", [])
+    if mapa_data and isinstance(mapa_data, list) and not (len(mapa_data) == 1 and mapa_data[0].get("Provincia_Compatible") == "N/A"):
         geojson_costa_rica = load_geojson_costa_rica() 
+
         if geojson_costa_rica:
             try:
-                df_mapa = pd.DataFrame(mapa_data_json)
-                if 'Provincia_Compatible' in df_mapa.columns and 'm2_construidos' in df_mapa.columns:
-                    df_mapa['m2_construidos'] = pd.to_numeric(df_mapa['m2_construidos'], errors='coerce').fillna(0)
-                    for feature_mapa in geojson_costa_rica['features']:
-                        if 'properties' in feature_mapa and 'NAME_1' in feature_mapa['properties']:
-                             nombre_prov_original_geo_mapa = feature_mapa['properties']['NAME_1']
-                             nombre_prov_normalizado_geo_mapa = nombre_prov_original_geo_mapa.lower().replace('san jose', 'sanjosé').replace('san josé', 'sanjosé').replace('limon', 'limón').title()
-                             feature_mapa['properties']['Provincia_Compatible_Geo'] = nombre_prov_normalizado_geo_mapa
-                        else:
-                            if 'properties' not in feature_mapa: feature_mapa['properties'] = {}
-                            feature_mapa['properties']['Provincia_Compatible_Geo'] = "ErrorNombreGeo"
-                    
-                    fig_mapa = px.choropleth_mapbox(df_mapa, geojson=geojson_costa_rica, 
-                                             locations='Provincia_Compatible', 
-                                             featureidkey="properties.Provincia_Compatible_Geo", 
-                                             color='m2_construidos',
-                                             color_continuous_scale="Greens", 
-                                             mapbox_style="carto-positron", 
-                                             zoom=6.2, center = {"lat": 9.7489, "lon": -83.7534}, 
-                                             opacity=0.6,
-                                             labels={'m2_construidos':'M² Construidos'},
-                                             title=sec_cfia.get("mapa_m2_provincial_titulo_sugerido", "M² Acumulados por Provincia")
-                                            )
-                    fig_mapa.update_layout(title_x=0.5, margin={"r":0,"t":40,"l":0,"b":0}, 
-                                           paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                                           font_color=COLOR_TEXTO_CUERPO_CSS)
-                    st.plotly_chart(fig_mapa, use_container_width=True)
-                    st.caption(sec_cfia.get("mapa_m2_provincial_caption_texto", "Fuente: CFIA"))
-                else:
-                    st.info("Datos para el mapa coroplético incompletos (faltan 'Provincia_Compatible' o 'm2_construidos').")
-            except Exception as e_mapa_render:
-                st.error(f"Error al generar mapa coroplético: {e_mapa_render}")
+                df_mapa = pd.DataFrame(mapa_data)
+                for feature in geojson_costa_rica['features']:
+                    if 'properties' in feature and 'NAME_1' in feature['properties']:
+                         nombre_prov_original = feature['properties']['NAME_1']
+                         nombre_prov_normalizado = nombre_prov_original.lower().replace('san jose', 'sanjosé').replace('san josé', 'sanjosé').replace('limon', 'limón').title()
+                         feature['properties']['Provincia_Compatible_Geo'] = nombre_prov_normalizado 
+                    else:
+                        if 'properties' not in feature: feature['properties'] = {}
+                        feature['properties']['Provincia_Compatible_Geo'] = "ErrorNombreGeo"
+
+                fig_mapa = px.choropleth_mapbox(df_mapa, geojson=geojson_costa_rica, 
+                                         locations='Provincia_Compatible', 
+                                         featureidkey="properties.Provincia_Compatible_Geo", 
+                                         color='m2_construidos',
+                                         color_continuous_scale="Viridis", 
+                                         mapbox_style="carto-positron", 
+                                         zoom=6, center = {"lat": 9.7489, "lon": -83.7534}, 
+                                         opacity=0.7,
+                                         labels={'m2_construidos':'M² Construidos'},
+                                         title=sec_cfia.get("mapa_m2_provincial_titulo_sugerido", "M² Acumulados por Provincia")
+                                        )
+                fig_mapa.update_layout(
+                    title_x=0.5, 
+                    margin={"r":0,"t":40,"l":0,"b":0}, 
+                    paper_bgcolor='rgba(0,0,0,0)', 
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font_color=COLOR_TEXTO_CUERPO_CSS
+                )
+                st.plotly_chart(fig_mapa, use_container_width=True)
+                st.caption(sec_cfia.get("mapa_m2_provincial_caption_texto", "Fuente: CFIA"))
+            except Exception as e_mapa:
+                st.error(f"Error al generar mapa coroplético: {e_mapa}")
+                if geojson_costa_rica and 'features' in geojson_costa_rica and geojson_costa_rica['features']:
+                    st.json(geojson_costa_rica['features'][0]['properties']) 
         else:
             st.warning("No se pudo cargar el GeoJSON para el mapa.")
     else:
-        st.info("No hay datos disponibles para el mapa coroplético de M² por provincia en el JSON.")
+        st.info("No hay datos disponibles para el mapa coroplético de M² por provincia.")
 
     # 4. Gráficos de Desglose por Tipo de Obra CFIA
-    desglose_obra_data_json = sec_cfia.get("graficos_desglose_obra_data", {})
-    captions_desglose_json = sec_cfia.get("captions_desglose_obra", {})
-    if desglose_obra_data_json and isinstance(desglose_obra_data_json, dict):
+    desglose_obra_data = sec_cfia.get("graficos_desglose_obra_data", {})
+    captions_desglose = sec_cfia.get("captions_desglose_obra", {})
+    if desglose_obra_data:
         st.subheader(sec_cfia.get("desglose_tipo_obra_subtitulo_texto", "Desglose M² por Tipo de Obra (CFIA)"))
+        
         col1_obra, col2_obra = st.columns(2)
-        columns_map_desglose = {0: col1_obra, 1: col2_obra}
-        col_idx_desglose = 0
-        for tipo_obra_json, datos_obra_lista_json in desglose_obra_data_json.items():
-            if datos_obra_lista_json and isinstance(datos_obra_lista_json, list):
-                df_obra_json = pd.DataFrame(datos_obra_lista_json)
-                if not df_obra_json.empty and 'Mes' in df_obra_json.columns:
-                    meses_json = df_obra_json['Mes'].tolist()
-                    subobras_cols_json = [col for col in df_obra_json.columns if col != 'Mes']
-                    fig_obra_json = go.Figure()
-                    for sub_col_json in subobras_cols_json:
-                        if sub_col_json in df_obra_json.columns:
-                            df_obra_json[sub_col_json] = pd.to_numeric(df_obra_json[sub_col_json], errors='coerce').fillna(0)
-                            if (df_obra_json[sub_col_json] > 0).any():
-                                 fig_obra_json.add_trace(go.Bar(name=sub_col_json, x=meses_json, y=df_obra_json[sub_col_json]))
-                    if not fig_obra_json.data:
-                        with columns_map_desglose[col_idx_desglose % 2]: st.info(f"No hay datos de M² para graficar para: {tipo_obra_json}")
-                        col_idx_desglose += 1; continue
-                    fig_obra_json.update_layout(barmode='stack', title=captions_desglose_json.get(tipo_obra_json, f"M² Mensuales: {tipo_obra_json}"),
-                                                title_x=0.5, xaxis_title='Mes', yaxis_title='M² Construidos',
-                                                legend_title_text='Sub-Tipo de Obra', paper_bgcolor='rgba(0,0,0,0)', 
-                                                plot_bgcolor='rgba(0,0,0,0)', font_color=COLOR_TEXTO_CUERPO_CSS)
-                    current_column_desglose = columns_map_desglose[col_idx_desglose % 2]
-                    with current_column_desglose:
-                        st.plotly_chart(fig_obra_json, use_container_width=True)
-                        st.caption(captions_desglose_json.get(tipo_obra_json, f"Fuente: CFIA - {tipo_obra_json}"))
-                    col_idx_desglose += 1
+        columns_map = {0: col1_obra, 1: col2_obra}
+        col_idx = 0
+
+        for tipo_obra, datos_obra_lista in desglose_obra_data.items():
+            if datos_obra_lista and isinstance(datos_obra_lista, list):
+                df_obra = pd.DataFrame(datos_obra_lista)
+                if not df_obra.empty and 'Mes' in df_obra.columns:
+                    meses = df_obra['Mes'].tolist()
+                    subobras_cols = [col for col in df_obra.columns if col != 'Mes']
+                    
+                    fig_obra = go.Figure()
+                    for sub_col in subobras_cols:
+                        # Solo añadir la traza si la columna de subobra existe y tiene datos
+                        if sub_col in df_obra.columns and df_obra[sub_col].sum() > 0:
+                             fig_obra.add_trace(go.Bar(name=sub_col, x=meses, y=df_obra[sub_col]))
+                    
+                    if not fig_obra.data: # Si no se añadió ninguna traza
+                        st.info(f"No hay datos de M² significativos para graficar para Tipo de Obra: {tipo_obra}")
+                        continue
+
+                    fig_obra.update_layout(
+                        barmode='stack',
+                        title=captions_desglose.get(tipo_obra, f"M² Mensuales: {tipo_obra}"),
+                        title_x=0.5,
+                        xaxis_title='Mes',
+                        yaxis_title='M² Construidos',
+                        legend_title_text='Sub-Tipo de Obra',
+                        paper_bgcolor='rgba(0,0,0,0)', 
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        font_color=COLOR_TEXTO_CUERPO_CSS
+                    )
+                    
+                    current_column = columns_map[col_idx % 2]
+                    with current_column:
+                        st.plotly_chart(fig_obra, use_container_width=True)
+                        st.caption(captions_desglose.get(tipo_obra, f"Fuente: CFIA - {tipo_obra}"))
+                    col_idx += 1
                 else:
-                    with columns_map_desglose[col_idx_desglose % 2]: st.info(f"No hay datos válidos para graficar el tipo de obra: {tipo_obra_json}.")
-                    col_idx_desglose += 1
+                    with columns_map[col_idx % 2]: # Poner el mensaje en la columna correspondiente
+                        st.info(f"No hay datos válidos para graficar el tipo de obra: {tipo_obra}")
+                    col_idx += 1
             else:
-                 with columns_map_desglose[col_idx_desglose % 2]: st.info(f"Datos para tipo de obra '{tipo_obra_json}' no disponibles o en formato incorrecto.")
-                 col_idx_desglose += 1
+                 with columns_map[col_idx % 2]:
+                    st.info(f"Datos para tipo de obra '{tipo_obra}' no disponibles o en formato incorrecto.")
+                 col_idx += 1
         if sec_cfia.get("nota_graficos_adicionales_texto"):
             st.caption(sec_cfia.get("nota_graficos_adicionales_texto"))
     else:
-        st.info("No hay datos disponibles para el desglose por tipo de obra CFIA en el JSON.")
+        st.info("No hay datos disponibles para el desglose por tipo de obra CFIA.")
+    # --- FIN NUEVO CÓDIGO ---
+
+    # --- C. Análisis de la Competencia (tu código actual) ---
+    sec_comp = data.get("analisis_competencia", {})
+    st.subheader(sec_comp.get('subtitulo_texto', "C. Análisis de la Competencia"))
+    st.write(sec_comp.get('parrafo_intro_texto', ""))
+    for i, comp in enumerate(sec_comp.get('lista_competidores_data', [])):
+        nombre_competidor = comp.get('nombre_y_url_texto', '').split('(')[0].strip()
+        if not nombre_competidor: nombre_competidor = f"Competidor {comp.get('id_competidor_display_texto', i+1)}"
+        with st.expander(f"{comp.get('id_competidor_display_texto', f'Competidor {i+1}')}: {nombre_competidor}", expanded=i==0): 
+            st.markdown(f"**URL:** {comp.get('nombre_y_url_texto', 'N/A')}")
+            st.markdown(f"**Giro Principal:** {comp.get('giro_principal_inferido_texto', 'N/A')}")
+            st.markdown(f"**Productos/Servicios Clave:** {comp.get('productos_servicios_clave_texto', 'N/A')}")
+            st.markdown(f"**Propuesta de Valor:** {comp.get('propuesta_valor_observada_texto', 'N/A')}")
+            st.markdown(f"**{comp.get('fortalezas_clave_titulo_texto', 'Fortalezas Clave:')}**")
+            for f_item in comp.get('fortalezas_clave_lista_textos', []): st.markdown(f"• {f_item}")
+    st.caption(sec_comp.get('nota_adicionales_texto', ""))
     st.markdown("---")
 
-    # --- C. Análisis de la Competencia ---
-    sec_comp = data.get("analisis_competencia_data", {})
-    st.subheader(sec_comp.get('titulo_subseccion_texto', "C. Análisis de la Competencia"))
-    st.write(sec_comp.get('intro_competencia_texto', ""))
-    for i_comp_render, comp_render_data in enumerate(sec_comp.get('lista_competidores_data', [])):
-        nombre_competidor_render = comp_render_data.get('nombre_y_url_texto', '').split('(')[0].strip()
-        if not nombre_competidor_render: nombre_competidor_render = f"Competidor {comp_render_data.get('id_competidor_display_texto', i_comp_render+1)}"
-        with st.expander(f"{comp_render_data.get('id_competidor_display_texto', f'Competidor {i_comp_render+1}')}: {nombre_competidor_render}", expanded= (i_comp_render == 0) ):
-            st.markdown(f"**URL:** {comp_render_data.get('nombre_y_url_texto', 'N/A')}")
-            st.markdown(f"**Giro Principal Inferido:** {comp_render_data.get('giro_principal_inferido_texto', 'N/A')}")
-            prods_servs_comp_render = comp_render_data.get('productos_servicios_clave_lista_textos', [])
-            if prods_servs_comp_render and prods_servs_comp_render != ['N/A']:
-                prods_servs_comp_render = comp_render_data.get('productos_servicios_clave_lista_textos', []) # Asegúrate de que esta línea esté antes
-            if prods_servs_comp_render and prods_servs_comp_render != ['N/A']: # Verifica que haya datos
-                st.markdown(f"**Productos/Servicios Clave:**")
-                for ps_item_render in prods_servs_comp_render: # Bucle normal
-                    st.markdown(f"  • {ps_item_render}")
-            else: # Manejar el caso de que no haya productos o sea N/A
-                st.markdown(f"**Productos/Servicios Clave:** N/A")
-            else: st.markdown(f"**Productos/Servicios Clave:** N/A")
-            marcas_gest_comp_render = comp_render_data.get('marcas_gestionadas_lista_textos', [])
-            if marcas_gest_comp_render and marcas_gest_comp_render != ['N/A']:
-                st.markdown(f"**Marcas que Gestiona/Destaca:** {', '.join(marcas_gest_comp_render)}")
-            else: st.markdown(f"**Marcas que Gestiona/Destaca:** N/A")
-            st.markdown(f"**Propuesta de Valor Observada:** {comp_render_data.get('propuesta_valor_observada_texto', 'N/A')}")
-            st.markdown(f"**{comp_render_data.get('fortalezas_clave_titulo_texto', 'Fortalezas Clave:')}**")
-            for f_item_render in comp_render_data.get('fortalezas_clave_lista_textos', ["N/A"]): st.markdown(f"• {f_item_render}")
-            st.markdown(f"**{comp_render_data.get('comparativo_titulo_texto', 'Análisis Comparativo vs. Cliente:')}**")
-            if comp_render_data.get("comparativo_error_texto"): st.warning(comp_render_data.get("comparativo_error_texto"))
-            else:
-                solap_list_render = comp_render_data.get('comparativo_solapamiento_lista_textos', [])
-                if solap_list_render and solap_list_render != ["N/A"]:
-                    st.markdown("<u>Puntos Clave de Solapamiento en Oferta:</u>", unsafe_allow_html=True)
-                    for s_item_render in solap_list_render: st.markdown(f"  • {s_item_render}")
-                st.markdown(f"<i>Ventaja Potencial del Cliente:</i> {comp_render_data.get('comparativo_ventaja_cliente_texto', 'N/A')}", unsafe_allow_html=True)
-                st.markdown(f"<i>Ventaja Potencial del Competidor:</i> {comp_render_data.get('comparativo_ventaja_competidor_texto', 'N/A')}", unsafe_allow_html=True)
-                st.markdown(f"<i>Nivel de Amenaza Estimado:</i> {comp_render_data.get('comparativo_amenaza_texto', 'N/A')}", unsafe_allow_html=True)
-                obs_adic_render = comp_render_data.get('comparativo_observacion_texto', "")
-                if obs_adic_render: st.markdown(f"<i>Observación Adicional:</i> {obs_adic_render}", unsafe_allow_html=True)
-            st.markdown("---")
+    # --- D. Huella Digital y Ecosistema Online (tu código actual) ---
+    sec_huella = data.get("huella_digital_ecosistema", {})
+    st.subheader(sec_huella.get('subtitulo_texto', "D. Huella Digital y Ecosistema Online"))
+    st.markdown(f"**{sec_huella.get('cliente_titulo_texto', 'Huella Digital del Cliente')}**")
+    st.write(sec_huella.get('cliente_evaluacion_sitio_texto', ""))
+    st.caption(sec_huella.get('cliente_palabras_clave_sugeridas_texto', ""))
+    st.markdown(f"**{sec_huella.get('ecosistema_titulo_texto', 'Ecosistema Digital del Sector y Tendencias')}**")
+    st.write(sec_huella.get('ecosistema_google_trends_intro_texto', ""))
+    for item in sec_huella.get('ecosistema_google_trends_lista_textos', []): st.markdown(f"• {item}")
     st.markdown("---")
 
-    # --- D. Huella Digital y Ecosistema Online ---
-    sec_huella = data.get("huella_digital_data", {})
-    st.subheader(sec_huella.get('titulo_subseccion_texto', "D. Huella Digital y Ecosistema Online"))
-    st.markdown(f"**{sec_huella.get('huella_cliente_titulo_texto', 'Huella Digital del Cliente')}**")
-    st.write(sec_huella.get('huella_cliente_analisis_texto', ""))
-    st.markdown(f"**{sec_huella.get('huella_cliente_keywords_titulo_texto', 'Palabras Clave Sugeridas:')}**")
-    for kw_hc_render in sec_huella.get('huella_cliente_keywords_lista_textos', ["N/A"]): st.markdown(f"• {kw_hc_render}")
-    st.markdown(f"**{sec_huella.get('ecosistema_digital_titulo_texto', 'Ecosistema Digital del Sector y Tendencias')}**")
-    st.write(sec_huella.get('ecosistema_digital_intro_texto', ""))
-    for trend_obj_render in sec_huella.get('tendencias_google_lista_objetos', []):
-        st.markdown(f"<u>Tendencias para '{trend_obj_render.get('keyword_tendencia_texto', 'N/A')}':</u>", unsafe_allow_html=True)
-        st.markdown(f"*{trend_obj_render.get('consultas_aumento_titulo_texto', 'Consultas en Aumento:')}*")
-        for consulta_aum_render in trend_obj_render.get('consultas_aumento_lista_textos', ["N/A"]): st.markdown(f"  • {consulta_aum_render}")
-    st.markdown("---")
-
-    # --- E. Síntesis de Oportunidades y Amenazas Externas ---
-    sec_sint_ext = data.get("sintesis_externa_foda_data", {})
+    # --- E. Síntesis de Oportunidades y Amenazas Externas (tu código actual) ---
+    sec_sint_ext = data.get("sintesis_oportunidades_amenazas_externas", {})
     st.subheader(sec_sint_ext.get('subtitulo_texto', "E. Síntesis de Oportunidades y Amenazas Externas"))
     st.markdown(f"**{sec_sint_ext.get('oportunidades_titulo_texto', 'Principales Oportunidades Externas:')}**")
-    for item_oe_render in sec_sint_ext.get('oportunidades_externas_lista_textos', ["N/A"]): st.markdown(f"• {item_oe_render}")
+    for item in sec_sint_ext.get('oportunidades_lista_textos', []): st.markdown(f"• {item}")
     st.markdown(f"**{sec_sint_ext.get('amenazas_titulo_texto', 'Principales Amenazas Externas:')}**")
-    for item_ae_render in sec_sint_ext.get('amenazas_externas_lista_textos', ["N/A"]): st.markdown(f"• {item_ae_render}")
-
-# ***** FIN DE LA FUNCIÓN MODIFICADA render_analisis_externo *****
+    for item in sec_sint_ext.get('amenazas_lista_textos', []): st.markdown(f"• {item}")
 
 def render_diagnostico_interno(data):
-    # ... (tu código de render_diagnostico_interno se mantiene igual) ...
     st.header(data.get('titulo_seccion_texto', "IV. Diagnóstico Interno: Evaluación de Capacidades y Madurez Estratégica"))
     sec_mad_glob = data.get("madurez_global_organizacion", {})
     st.subheader(sec_mad_glob.get('subtitulo_texto', "A. Nivel de Madurez Global de la Organización"))
@@ -714,7 +709,6 @@ def render_diagnostico_interno(data):
     for item in sec_sint_int.get('debilidades_lista_textos', []): st.markdown(f"• {item}")
 
 def render_sintesis_foda(data):
-    # ... (tu código de render_sintesis_foda se mantiene igual) ...
     st.header(data.get('titulo_seccion_texto', "V. Síntesis Estratégica: Matriz FODA y Desafíos Estratégicos"))
     texto_sesion_trabajo = "Este análisis requiere una sesión de trabajo colaborativa. Se recomienda realizarla con los líderes de proceso y Eco Consultor para identificar la estrategia a seguir y definir los próximos pasos."
     sec_matriz = data.get("matriz_foda_integrada", {})
@@ -761,7 +755,6 @@ def render_sintesis_foda(data):
             st.markdown(f"• {desafio}")
 
 def render_formulacion_estrategica(data):
-    # ... (tu código de render_formulacion_estrategica se mantiene igual) ...
     st.header(data.get('titulo_seccion_texto', "VI. Formulación Estratégica: Definiendo el Rumbo"))
     sec_identidad = data.get("identidad_estrategica", {})
     st.subheader(sec_identidad.get('subtitulo_texto', "A. Revisión/Definición de la Identidad Estratégica"))
@@ -790,7 +783,6 @@ def render_formulacion_estrategica(data):
              "Es crucial que la empresa articule y comunique consistentemente una propuesta de valor clara y diferenciada."))
 
 def render_hoja_ruta(data):
-    # ... (tu código de render_hoja_ruta se mantiene igual) ...
     st.header(data.get('titulo_seccion_texto', "VII. Hoja de Ruta Estratégica: Iniciativas y Planes de Acción"))
     texto_sesion_trabajo = "Este cronograma es una visualización preliminar. Se recomienda desarrollar un Diagrama de Gantt más elaborado en la fase de planificación de la ejecución."
     sec_intro = data.get("introduccion_hoja_ruta", {})
@@ -831,7 +823,6 @@ def render_hoja_ruta(data):
     st.caption(sec_cron.get('nota_plazos_texto', "CP: Corto Plazo (1-3 meses), MP: Mediano Plazo (4-9 meses), LP: Largo Plazo (10-18 meses)."))
 
 def render_implementacion(data):
-    # ... (tu código de render_implementacion se mantiene igual) ...
     st.header(data.get('titulo_seccion_texto', "VIII. Consideraciones para la Implementación y Gestión del Cambio"))
     texto_sesion_trabajo = "Esta sección requiere una discusión detallada y planificación. Se recomienda realizarla con los líderes de proceso y Eco Consultor."
     st.write(data.get('parrafo_intro_general_texto', 
@@ -884,7 +875,6 @@ def render_implementacion(data):
             st.markdown(f"  *Mitigación Sugerida:* {riesgo_item.get('mitigacion_texto', 'No especificada')}")
             
 def render_conclusiones(data):
-    # ... (tu código de render_conclusiones se mantiene igual) ...
     st.header(data.get('titulo_seccion_texto', "IX. Conclusiones Finales y Próximos Pasos Recomendados"))
     texto_sesion_trabajo = "Se recomienda una sesión de trabajo para detallar estos próximos pasos y asegurar el compromiso del equipo."
     sec_con_gral = data.get("conclusion_general_textos_data", {})
@@ -894,24 +884,30 @@ def render_conclusiones(data):
              "Es fundamental entender que la estrategia es un proceso continuo de aprendizaje, adaptación y ejecución."))
     st.markdown("---")
     
+    # --- SECCIÓN DE RECOMENDACIONES (PROCESADA UNA SOLA VEZ) ---
     sec_rec90 = data.get("recomendaciones_proximos_90_dias_data", {})
     st.subheader(sec_rec90.get('subtitulo_texto', "A. Recomendaciones Específicas para los Próximos 90 Días"))
+    
     parrafo_intro_recs = sec_rec90.get('parrafo_intro_texto', "")
     lista_recs = sec_rec90.get('lista_recomendaciones_textos', [])
+
     is_list_a_placeholder = False
     if lista_recs and len(lista_recs) == 1 and "(Placeholder:" in lista_recs[0]:
         is_list_a_placeholder = True
+
     if is_list_a_placeholder:
-        st.write(parrafo_intro_recs) 
-        st.info(lista_recs[0])      
-    elif lista_recs: 
+        st.write(parrafo_intro_recs) # Mostrar el párrafo introductorio
+        st.info(lista_recs[0])      # Mostrar el texto del placeholder en st.info
+    elif lista_recs: # Si hay recomendaciones reales
         st.write(parrafo_intro_recs)
         for item in lista_recs: 
             st.markdown(f"• {item}")
-    else: 
+    else: # Si la lista está completamente vacía
         st.write(parrafo_intro_recs) 
         st.info(texto_sesion_trabajo) 
-    st.markdown("---") 
+    # --- FIN SECCIÓN DE RECOMENDACIONES ---
+
+    st.markdown("---") # Esta línea de separación es correcta
     
     sec_sesion = data.get("propuesta_sesion_acompanamiento_data", {})
     st.subheader(sec_sesion.get('subtitulo_texto', "B. Propuesta de Sesión de Trabajo y Acompañamiento"))
@@ -926,25 +922,35 @@ def render_conclusiones(data):
              "Agradecemos sinceramente a todo el equipo por su tiempo, apertura y colaboración durante el proceso de diagnóstico."))
 
 # --- 5. ÁREA PRINCIPAL ---
+
+# Verifica si hay datos JSON cargados. Usar .get() para evitar AttributeError si la clave no existe.
 json_data_cargado = st.session_state.get('json_data', None)
 
 if json_data_cargado is None:
+    # Mostrar mensaje de error si existió un problema al cargar
     if st.session_state.get('error_carga', None):
         st.error(f"**Error al Cargar el Archivo:** {st.session_state.error_carga}")
+
+    # Mensaje de bienvenida y logo
     st.markdown(f"<h1 style='text-align: center; color: {COLOR_TEXTO_TITULO_PRINCIPAL_CSS}; margin-top: 2rem;'>Bienvenido al {APP_TITLE}</h1>", unsafe_allow_html=True)
+
     if logo_base64:
         st.markdown(f"<div style='text-align: center; margin: 2rem 0;'><img src='data:image/png;base64,{logo_base64}' alt='Logo ECO' style='max-width: 150px; height: auto;'></div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<p style='text-align: center; font-size: 1.0em; color: {COLOR_TEXTO_SUTIL_CSS};'>(Logo ECO Consultores no disponible)</p>", unsafe_allow_html=True)
+
     st.markdown("<p style='text-align: center; font-size: 1.2em; margin-bottom: 2rem;'>Para comenzar, por favor cargue el archivo JSON del diagnóstico DPE utilizando el panel de la izquierda.</p>", unsafe_allow_html=True)
     st.info("ℹ️ **Instrucciones:** Use el botón 'Browse files' o arrastre un archivo JSON al área designada en la barra lateral.")
-else:
-    json_data_main = json_data_cargado
+
+else: # Si hay datos JSON cargados
+    json_data_main = json_data_cargado # Usar la variable obtenida con .get()
     METADATOS_INFORME = json_data_main.get("metadatos_informe", {})
+
     st.markdown(f"<h1>{METADATOS_INFORME.get('titulo_informe_base','Informe DPE')} para <b>{st.session_state.nombre_cliente}</b></h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align: left; color: {COLOR_TEXTO_SUTIL_CSS}; font-size: 0.9em;'>Versión DPE: {METADATOS_INFORME.get('version_dpe', 'N/A')} | Fecha Diagnóstico: {METADATOS_INFORME.get('fecha_diagnostico', 'N/A')}</p>", unsafe_allow_html=True)
-    
-    if st.session_state.get('show_json_data', False):
+    #st.markdown("<hr>") # HR extra eliminada correctamente
+
+    if st.session_state.get('show_json_data', False): # Usar .get() aquí también por seguridad
         with st.expander("Ver Datos JSON Crudos Cargados (Global)", expanded=False):
             st.json(json_data_main)
     
@@ -983,19 +989,23 @@ else:
             data_key = tab_titles_map[tab_title_display]
             render_function = render_functions_map.get(data_key)
             data_for_section = json_data_main.get(data_key, {})
+
             if render_function:
                 if data_for_section or data_key == "portada":
                     render_function(data_for_section)
                 else:
-                    st.warning(f"Datos para la sección '{tab_title_display}' (clave JSON: '{data_key}') no encontrados o vacíos.")
+                    st.warning(f"Datos para la sección '{tab_title_display}' (clave: '{data_key}') no encontrados o vacíos en el archivo JSON.")
+                    render_function({})
             else:
                 st.error(f"Función de renderizado no encontrada para la clave de datos: {data_key}")
+
 
 # --- 6. PIE DE PÁGINA ---
 st.markdown("<hr style='margin-top: 3rem; margin-bottom: 1rem;'>", unsafe_allow_html=True)
 version_dpe_footer_val = 'N/A'
 if st.session_state.json_data and "metadatos_informe" in st.session_state.json_data:
     version_dpe_footer_val = st.session_state.json_data['metadatos_informe'].get('version_dpe', 'N/A')
+
 footer_html = f"""
 <div style="text-align: center; color: {COLOR_TEXTO_SUTIL_CSS}; font-size: 0.9em; padding-bottom:10px;">
     <p>© {datetime.date.today().year} ECO Consultores. Todos los derechos reservados.<br/>
